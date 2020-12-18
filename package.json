@@ -1,0 +1,49 @@
+{
+  "name": "async-cache-queue",
+  "description": "Lightweight async task queue with cache, timeout and throttle management",
+  "version": "0.1.0",
+  "author": "Yusuke Kawasaki <u-suke@kawa.net>",
+  "bugs": {
+    "url": "https://github.com/kawanet/async-cache-queue/issues"
+  },
+  "contributors": [
+    "Yusuke Kawasaki <u-suke@kawa.net>"
+  ],
+  "devDependencies": {
+    "@types/mocha": "^8.2.0",
+    "@types/node": "^14.14.14",
+    "mocha": "^8.2.1",
+    "typescript": "^4.1.3"
+  },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "lib/*.js",
+    "types/async-cache-queue.d.ts"
+  ],
+  "homepage": "https://github.com/kawanet/async-cache-queue#readme",
+  "keywords": [
+    "cache",
+    "concurrency",
+    "memoize",
+    "queue",
+    "throttle",
+    "timeout"
+  ],
+  "license": "MIT",
+  "main": "./lib/async-cache-queue.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kawanet/async-cache-queue.git"
+  },
+  "scripts": {
+    "build": "./node_modules/.bin/tsc -p .",
+    "fixpack": "fixpack",
+    "mocha": "./node_modules/.bin/mocha -R spec test/*.js",
+    "test": "npm run mocha"
+  },
+  "typings": "./types/async-cache-queue.d.ts",
+  "dependencies": {
+    "axios": "^0.21.0"
+  }
+}
