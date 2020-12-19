@@ -29,21 +29,25 @@ export function queueFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
         timeoutFallback
     } = options || {} as QueueOptions;
 
-    const timeoutFn = timeout && timeoutFactory(timeout, timeoutFallback);
-    const concurrencyFn = concurrency && concurrencyFactory(concurrency);
-    const cacheFn = (cache || negativeCache || refresh) && cacheFactory(options);
+    let flow: FF<any, any> = null;
 
-    return fn => {
-        let flow: FF<any, any> = null;
-
-        flow = join(flow, timeoutFn);
-        flow = join(flow, concurrencyFn);
-        flow = join(flow, cacheFn);
-
-        if (!flow) flow = fn => arg => Promise.resolve(arg).then(fn)
-
-        return flow(fn);
+    if (timeout) {
+        flow = join(flow, timeoutFactory(timeout, timeoutFallback));
     }
+
+    if (concurrency) {
+        flow = join(flow, concurrencyFactory(concurrency));
+    }
+
+    if (cache || negativeCache || refresh) {
+        flow = join(flow, cacheFactory(options));
+    }
+
+    if (!flow) {
+        flow = fn => arg => Promise.resolve(arg).then(fn)
+    }
+
+    return fn => flow(fn);
 }
 
 function join<IN, OUT>(prev: FF<IN, OUT>, filter: FF<IN, OUT>): FF<IN, OUT> {
