@@ -24,7 +24,6 @@ export function queueFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
         cache,
         concurrency,
         negativeCache,
-        refresh,
         timeout,
         timeoutFallback
     } = options || {} as QueueOptions;
@@ -39,7 +38,7 @@ export function queueFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
         flow = join(flow, concurrencyFactory(concurrency));
     }
 
-    if (cache || negativeCache || refresh) {
+    if (cache || negativeCache) {
         flow = join(flow, cacheFactory(options));
     }
 

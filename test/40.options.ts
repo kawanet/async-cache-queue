@@ -31,7 +31,7 @@ describe(TESTNAME, () => {
 
             assert.throws(() => queueFactory({concurrency: -1})(NOP));
 
-            assert.throws(() => queueFactory({refresh: -1})(NOP));
+            assert.throws(() => queueFactory({cache: 1, refresh: -1})(NOP));
 
         });
     }
