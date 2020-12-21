@@ -11,7 +11,7 @@ interface CacheItem extends IItem {
 }
 
 export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>)) {
-    let {cache, hasher, negativeCache, refresh} = options;
+    let {cache, hasher, negativeCache, refresh, storage} = options;
 
     cache = +cache || 0;
     negativeCache = +negativeCache || 0;
@@ -64,7 +64,7 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
 
             function makeItem(): CacheItem {
                 const item: CacheItem = {
-                    value: Promise.resolve(arg).then(fn),
+                    value: storage ? startWithStorage() : start()
                 };
 
                 // unresolved cache could be refreshed
@@ -85,6 +85,17 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
                 });
 
                 return item;
+            }
+
+            function start() {
+                return Promise.resolve(arg).then(fn);
+            }
+
+            function startWithStorage() {
+                return Promise.resolve().then(() => storage.get(key))
+                    .then(cached => (cached != null) ? cached : start()
+                        .then(result => (result == null) ? result :
+                            Promise.resolve().then(() => storage.set(key, result)).then(() => result)));
             }
         };
     }

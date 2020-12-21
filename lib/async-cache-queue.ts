@@ -12,9 +12,16 @@ export interface QueueOptions {
     negativeCache?: number;
     refresh?: number;
     hasher?: (arg: any) => string;
+    storage?: KVS;
     concurrency?: number;
     timeout?: number;
     timeoutFallback?: (arg?: any) => any;
+}
+
+export interface KVS<T = any> {
+    get(key: string): Promise<T>;
+
+    set(key: string, value: T): Promise<void>;
 }
 
 type FF<IN, OUT> = (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>));
@@ -24,6 +31,7 @@ export function queueFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
         cache,
         concurrency,
         negativeCache,
+        storage,
         timeout,
         timeoutFallback
     } = options || {} as QueueOptions;
@@ -38,7 +46,7 @@ export function queueFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
         flow = join(flow, concurrencyFactory(concurrency));
     }
 
-    if (cache || negativeCache) {
+    if (cache || negativeCache || storage) {
         flow = join(flow, cacheFactory(options));
     }
 
