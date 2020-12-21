@@ -7,21 +7,23 @@ import {concurrencyFactory} from "./concurrency";
 import {timeoutFactory} from "./timeout";
 import {clearCache as _clearCache} from "./data-storage";
 
-export interface QueueOptions {
+export interface QueueOptions<IN = any, OUT = any> {
     /**
      * Set cache TTL in milliseconds since a succeeded result resolved.
-     * Set `-1` not to expire it.
+     * The internal cache feature stores its value as a Promise but not resolved value.
+     * Set `-1` never to expire it.
      *
-     * Default: `0` means to disable the cache.
+     * @default `0` to disable the cache.
      */
 
     cache?: number;
 
     /**
      * Set negative cache TTL in milliseconds since a failed result rejected.
+     * The internal cache feature stores its value as a Promise but not rejected reasons.
      * Set `-1` not to expire it.
      *
-     * Default: `0` means to disable the negative cache.
+     * @default `0` to disable the negative cache.
      */
 
     negativeCache?: number;
@@ -31,7 +33,7 @@ export interface QueueOptions {
      * It executes the function to fetch a new result in background for the next coming request.
      * Note tha the last cached result is returned for the current running request.
      *
-     * Default: `0` means to disable the pre-fetch feature.
+     * @default `0` to disables the pre-fetch feature.
      */
 
     refresh?: number;
@@ -39,7 +41,7 @@ export interface QueueOptions {
     /**
      * Set a function to stringify cache key.
      *
-     * Default: `JSON.stringify()`
+     * @default: `(arg) => JSON.stringify(arg)`
      */
 
     hasher?: (arg: any) => string;
@@ -48,15 +50,17 @@ export interface QueueOptions {
      * Set an external key-value storage adapter which has `.get(key)` and `.set(key, val)` methods.
      * Note that the `cache` option above does not affect for the external storage.
      * It needs to manage a proper expiration duration on the storage.
+     *
+     * @default `undefined` not to connect to any external storage.
      */
 
-    storage?: KVS;
+    storage?: KVS<OUT>;
 
     /**
      * Set a maximum limit number of concurrent working jobs.
      * The rest jobs will wait to start until another slot opened.
      *
-     * Default: `0` means to disable the throttle feature.
+     * @default `0` to disable the throttle feature.
      */
 
     concurrency?: number;
@@ -64,7 +68,7 @@ export interface QueueOptions {
     /**
      * Set time in milliseconds to stop a long working unresolved job since it started.
      *
-     * Default: `0` means to disable the timeout feature.
+     * @default `0` to disable the timeout feature.
      */
 
     timeout?: number;
@@ -74,10 +78,10 @@ export interface QueueOptions {
      * instead of long working jobs which has exceeded `timeout` milliseconds.
      * Set `() => undefined` just to ignore the job.
      *
-     * Default: `() => Promise.reject(new Error("timeout: ${timeout}ms"));`
+     * @default `() => Promise.reject(new Error("timeout: ${timeout}ms"));`
      */
 
-    timeoutFallback?: (arg?: any) => any;
+    timeoutFallback?: (arg?: IN) => OUT;
 }
 
 /**

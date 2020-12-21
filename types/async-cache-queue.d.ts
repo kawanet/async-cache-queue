@@ -1,19 +1,21 @@
 /**
  * async-cache-queue.ts
  */
-export interface QueueOptions {
+export interface QueueOptions<IN = any, OUT = any> {
     /**
      * Set cache TTL in milliseconds since a succeeded result resolved.
-     * Set `-1` not to expire it.
+     * The internal cache feature stores its value as a Promise but not resolved value.
+     * Set `-1` never to expire it.
      *
-     * Default: `0` means to disable the cache.
+     * @default `0` to disable the cache.
      */
     cache?: number;
     /**
      * Set negative cache TTL in milliseconds since a failed result rejected.
+     * The internal cache feature stores its value as a Promise but not rejected reasons.
      * Set `-1` not to expire it.
      *
-     * Default: `0` means to disable the negative cache.
+     * @default `0` to disable the negative cache.
      */
     negativeCache?: number;
     /**
@@ -21,32 +23,47 @@ export interface QueueOptions {
      * It executes the function to fetch a new result in background for the next coming request.
      * Note tha the last cached result is returned for the current running request.
      *
-     * Default: `0` means to disable the pre-fetch feature.
+     * @default `0` to disables the pre-fetch feature.
      */
     refresh?: number;
     /**
-     * Set a function to stringify cache key.
+     * Set an array of strings which indicate the property names of the `arg` object
+     * that should be used as a part of the cache key.
      *
-     * Default: `JSON.stringify()`
+     * @default `undefined` to use whole object as a cache key.
      */
-    hasher?: (arg: any) => string;
+    keyNames?: string[];
+    /**
+     * Set a minimum key length threshold to apply `keyDigest` below.
+     *
+     * @default `64`
+     */
+    enableDigest?: number;
+    /**
+     * Set a function to generate hash string to keep keys in proper length.
+     *
+     * @default `(key) => crypto.createHash("sha1").update(key).digest("hex")`
+     */
+    keyDigest?: (key: string) => string;
     /**
      * Set an external key-value storage adapter which has `.get(key)` and `.set(key, val)` methods.
      * Note that the `cache` option above does not affect for the external storage.
      * It needs to manage a proper expiration duration on the storage.
+     *
+     * @default `undefined` not to connect to any external storage.
      */
-    storage?: KVS;
+    storage?: KVS<OUT>;
     /**
      * Set a maximum limit number of concurrent working jobs.
      * The rest jobs will wait to start until another slot opened.
      *
-     * Default: `0` means to disable the throttle feature.
+     * @default `0` to disable the throttle feature.
      */
     concurrency?: number;
     /**
      * Set time in milliseconds to stop a long working unresolved job since it started.
      *
-     * Default: `0` means to disable the timeout feature.
+     * @default `0` to disable the timeout feature.
      */
     timeout?: number;
     /**
@@ -54,9 +71,9 @@ export interface QueueOptions {
      * instead of long working jobs which has exceeded `timeout` milliseconds.
      * Set `() => undefined` just to ignore the job.
      *
-     * Default: `() => Promise.reject(new Error("timeout: ${timeout}ms"));`
+     * @default `() => Promise.reject(new Error("timeout: ${timeout}ms"));`
      */
-    timeoutFallback?: (arg?: any) => any;
+    timeoutFallback?: (arg?: IN) => OUT;
 }
 /**
  * Interface for external key-value storage, e.g. https://www.npmjs.com/package/keyv

@@ -205,13 +205,13 @@ DESCRIBE(TESTNAME, () => {
     }
 });
 
-function getKeyv(namespace: string): KVS {
+function getKeyv<T = any>(namespace: string): KVS<T> {
     const Keyv = require('keyv');
     const KeyvMemcache = require('keyv-memcache');
 
-    const memcache: Store<any> = new KeyvMemcache(MEMCACHE_SERVERS);
+    const memcache: Store<T> = new KeyvMemcache(MEMCACHE_SERVERS);
 
-    const options: Options<any> = {
+    const options: Options<T> = {
         namespace: PREFIX + namespace,
         store: memcache,
         ttl: 10000,
