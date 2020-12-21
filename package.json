@@ -43,6 +43,7 @@
   },
   "scripts": {
     "build": "./node_modules/.bin/tsc -p .",
+    "build-types": "./node_modules/.bin/tsc -p types",
     "fixpack": "fixpack",
     "mocha": "./node_modules/.bin/mocha -R spec test/*.js",
     "test": "npm run mocha"

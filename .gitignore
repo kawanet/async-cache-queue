@@ -1,3 +1,4 @@
+!types/async-cache-queue.d.ts
 *.tgz
 *~
 .DS_Store
@@ -10,4 +11,5 @@ node_modules/
 npm-debug.log*
 package-lock.json
 test/*.js
+types/*.d.ts
 ~$*

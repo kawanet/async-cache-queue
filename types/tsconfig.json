@@ -1,0 +1,17 @@
+{
+  "files": [
+    "../lib/async-cache-queue.ts"
+  ],
+  "exclude": [
+    "../lib"
+  ],
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": ".",
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ]
+  }
+}
