@@ -48,8 +48,5 @@
     "mocha": "./node_modules/.bin/mocha -R spec test/*.js",
     "test": "npm run mocha"
   },
-  "typings": "./types/async-cache-queue.d.ts",
-  "dependencies": {
-    "axios": "^0.21.0"
-  }
+  "typings": "./types/async-cache-queue.d.ts"
 }
