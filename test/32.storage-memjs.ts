@@ -7,7 +7,6 @@
  */
 
 import {strict as assert} from "assert";
-import * as crypto from "crypto";
 import {Client} from "memjs";
 import * as zlib from "zlib";
 
@@ -44,8 +43,7 @@ DESCRIBE(TESTNAME, () => {
             });
 
             const options: QueueOptions = {
-                storage: makeJsonKVS(client),
-                hasher: makeHasher("object"),
+                storage: makeJsonKVS(client, "object")
             };
 
             const cached = queueFactory(options)(testFn);
@@ -81,8 +79,7 @@ DESCRIBE(TESTNAME, () => {
             const testFn = (num: number): Promise<string> => WAIT(1).then(() => counter++).then(() => "x".repeat(num));
 
             const options: QueueOptions = {
-                storage: makeJsonKVS(client),
-                hasher: makeHasher("string"),
+                storage: makeJsonKVS(client, "string")
             };
 
             const cached = queueFactory(options)(testFn);
@@ -120,8 +117,7 @@ DESCRIBE(TESTNAME, () => {
             const testFn = (num: number): Promise<number> => WAIT(1).then(() => counter++).then(() => num * 10);
 
             const options: QueueOptions = {
-                storage: makeJsonKVS(client),
-                hasher: makeHasher("number"),
+                storage: makeJsonKVS(client, "number")
             };
 
             const cached = queueFactory(options)(testFn);
@@ -159,8 +155,7 @@ DESCRIBE(TESTNAME, () => {
             const testFn = (num: number): Promise<boolean> => WAIT(1).then(() => counter++).then(() => !!(num % 2));
 
             const options: QueueOptions = {
-                storage: makeJsonKVS(client),
-                hasher: makeHasher("boolean"),
+                storage: makeJsonKVS(client, "boolean")
             };
 
             const cached = queueFactory(options)(testFn);
@@ -198,8 +193,7 @@ DESCRIBE(TESTNAME, () => {
             const testFn = (num: number): Promise<Buffer> => WAIT(1).then(() => counter++).then(() => Buffer.from([num]));
 
             const options: QueueOptions = {
-                storage: makeBufferKVS(client),
-                hasher: makeHasher("Buffer"),
+                storage: makeBufferKVS(client, "Buffer")
             };
 
             const cached = queueFactory(options)(testFn);
@@ -222,33 +216,29 @@ DESCRIBE(TESTNAME, () => {
     }
 });
 
-function makeHasher(namespace: string) {
-    return (key: string) => {
-        key = JSON.stringify(key);
-        const hash = crypto.createHash("sha1").update(key).digest("hex");
-        return PREFIX + namespace + ":" + hash;
-    }
-}
-
-function makeJsonKVS<T>(client: Client): KVS<T> {
+function makeJsonKVS<T>(client: Client, namespace: string): KVS<T> {
     return {
         get: (key: string): Promise<T> => {
+            key = PREFIX + namespace + ":" + key;
             return client.get(key).then(({value}) => value && JSON.parse(zlib.inflateSync(value) as any as string));
         },
 
         set: (key: string, value: T): Promise<void> => {
+            key = PREFIX + namespace + ":" + key;
             return client.set(key, zlib.deflateSync(JSON.stringify(value)), {}) as Promise<any>;
         },
     }
 }
 
-function makeBufferKVS(client: Client): KVS<Buffer> {
+function makeBufferKVS(client: Client, prefix: string): KVS<Buffer> {
     return {
         get: (key: string): Promise<Buffer> => {
+            key = PREFIX + prefix + ":" + key;
             return client.get(key).then(({value}) => value && zlib.inflateSync(value));
         },
 
         set: (key: string, value: Buffer): Promise<void> => {
+            key = PREFIX + prefix + ":" + key;
             return client.set(key, zlib.deflateSync(value), {}) as Promise<any>;
         },
     }
