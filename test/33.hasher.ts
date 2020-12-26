@@ -33,4 +33,32 @@ describe(TESTNAME, () => {
         assert.equal(await COUNT({foo: {bar: 100}, qux: 4}) + 4, 104);
         assert.equal(await COUNT({foo: {bar: 200, buz: 1}}) + 5, 305);
     });
+
+    /**
+     * https://www.npmjs.com/package/object-hash
+     */
+
+    it("object-hash with excludeKeys", async () => {
+        const includeKeys: { [key: string]: number } = {foo: 1, bar: 1};
+
+        const options = {
+            excludeKeys: (key: string) => !includeKeys[key]
+        };
+
+        const hash = require("object-hash");
+
+        const queue = queueFactory({
+            cache: -1,
+            hasher: (arg: IN) => hash(arg, options),
+        });
+
+        let counter = 0;
+        const COUNT = queue<IN, number>(async arg => (counter += arg.foo.bar));
+
+        assert.equal(await COUNT({foo: {bar: 100, buz: 1}}) + 1, 101);
+        assert.equal(await COUNT({foo: {bar: 100, buz: 1}}) + 2, 102);
+        assert.equal(await COUNT({foo: {bar: 100, buz: 3}}) + 3, 103);
+        assert.equal(await COUNT({foo: {bar: 100}, qux: 4}) + 4, 104);
+        assert.equal(await COUNT({foo: {bar: 200, buz: 1}}) + 5, 305);
+    });
 });
