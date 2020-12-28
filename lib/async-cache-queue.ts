@@ -9,8 +9,9 @@ import {clearCache as _clearCache} from "./data-storage";
 
 export interface QueueOptions<IN = any, OUT = any> {
     /**
-     * Set cache TTL in milliseconds since a succeeded result resolved.
+     * Set a cache TTL in milliseconds since a succeeded result resolved.
      * The internal cache feature stores its value as a Promise but not resolved value.
+     * Note that the TTL is applied only for the internal cache but not for external storages.
      * Set `-1` never to expire it.
      *
      * @default `0` to disable the cache.
@@ -19,8 +20,9 @@ export interface QueueOptions<IN = any, OUT = any> {
     cache?: number;
 
     /**
-     * Set negative cache TTL in milliseconds since a failed result rejected.
+     * Set a negative cache TTL in milliseconds since a failed result rejected.
      * The internal cache feature stores its value as a Promise but not rejected reasons.
+     * Note that the negative cache is only work with the internal cache but not with external storages.
      * Set `-1` not to expire it.
      *
      * @default `0` to disable the negative cache.
@@ -29,14 +31,23 @@ export interface QueueOptions<IN = any, OUT = any> {
     negativeCache?: number;
 
     /**
-     * Set refresh interval in milliseconds.
+     * Set a refreshing interval in milliseconds.
      * It executes the function to fetch a new result in background for the next coming request.
-     * Note tha the last cached result is returned for the current running request.
+     * Note that the last cached result is returned for the current running request.
      *
-     * @default `0` to disables the pre-fetch feature.
+     * @default `0` to disables the feature.
      */
 
     refresh?: number;
+
+    /**
+     * Set a maximum number of items stored in the internal cache.
+     * Note that the restriction is applied only for the internal cache but not for external storages.
+     *
+     * @default `0` to disables the restriction.
+     */
+
+    maxItems?: number;
 
     /**
      * Set a function to stringify cache key.

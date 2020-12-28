@@ -11,7 +11,7 @@ interface CacheItem extends IItem {
 }
 
 export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>)) {
-    let {cache, hasher, negativeCache, refresh, storage} = options;
+    let {cache, hasher, maxItems, negativeCache, refresh, storage} = options;
 
     cache = +cache || 0;
     negativeCache = +negativeCache || 0;
@@ -34,10 +34,10 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
         const pendItems = new DataStorage<CacheItem>();
 
         // cache storage for resolved response
-        const okItems = getStorage<CacheItem>(cache);
+        const okItems = getStorage<CacheItem>(cache, maxItems);
 
         // cache storage for rejected response
-        const ngItems = getStorage<CacheItem>(negativeCache);
+        const ngItems = getStorage<CacheItem>(negativeCache, maxItems);
 
         return arg => {
             const key = hasher(arg);
@@ -101,8 +101,8 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
     }
 }
 
-function getStorage<I extends IItem>(cache: number): IStorage<I> {
-    if (cache > 0) return new TimedStorage<I>(cache);
-    if (cache < 0) return new SimpleStorage<I>();
+function getStorage<I extends IItem>(expires: number, maxItems: number): IStorage<I> {
+    if (expires > 0 || maxItems > 0) return new TimedStorage<I>(expires, maxItems);
+    if (expires < 0) return new SimpleStorage<I>();
     return new NullStorage<I>();
 }

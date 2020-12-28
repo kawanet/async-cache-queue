@@ -13,25 +13,31 @@ interface TimedItem extends IItem {
  */
 
 export class TimedStorage<I extends IItem> extends DataStorage<TimedItem> implements IStorage<TimedItem> {
-
+    // list of stored keys in order
     private keys = [] as string[];
+    private expires: number;
+    private maxItems: number;
 
-    constructor(private expires: number) {
+    constructor(expires: number, maxItems: number) {
         super();
+        this.expires = (expires > 0) && +expires || 0;
+        this.maxItems = (maxItems > 0) && +maxItems || 0;
     }
 
     get(key: string): I {
-        const {keys} = this;
+        const {expires, keys} = this;
         const store = this.store();
         const now = Date.now();
 
         // garbage collection
-        while (keys.length) {
-            const first = keys[0];
-            const item = store[first];
-            if (now <= item?.ttl) break;
-            keys.shift();
-            delete store[first];
+        if (expires) {
+            while (keys.length) {
+                const first = keys[0];
+                const item = store[first];
+                if (now <= item?.ttl) break;
+                keys.shift();
+                delete store[first];
+            }
         }
 
         // cached item
@@ -39,7 +45,7 @@ export class TimedStorage<I extends IItem> extends DataStorage<TimedItem> implem
 
         // check the item expired
         // this would rarely happen though
-        if (now > item?.ttl) {
+        if (expires && now > item?.ttl) {
             removeKey(keys, key);
             delete store[key];
             return;
@@ -49,7 +55,7 @@ export class TimedStorage<I extends IItem> extends DataStorage<TimedItem> implem
     }
 
     set(key: string, item: I): void {
-        const {keys, expires} = this;
+        const {expires, keys, maxItems} = this;
         const store = this.store();
 
         // check the key already exists
@@ -58,7 +64,18 @@ export class TimedStorage<I extends IItem> extends DataStorage<TimedItem> implem
             removeKey(keys, key);
         }
 
-        (item as TimedItem).ttl = Date.now() + expires;
+        // remove least recently stored item
+        if (maxItems) {
+            while (keys.length >= maxItems) {
+                const first = keys.shift();
+                delete store[first];
+            }
+        }
+
+        if (expires) {
+            (item as TimedItem).ttl = Date.now() + expires;
+        }
+
         store[key] = item;
         keys.push(key);
     }

@@ -1,11 +1,5 @@
 #!/usr/bin/env mocha -R spec
 
-/**
- * @example
- * docker run -d -p 11211:11211 --name memcached memcached
- * MEMCACHE_SERVERS=localhost:11211 mocha test/32.storage-memjs
- */
-
 import {strict as assert} from "assert";
 
 import {queueFactory} from "../lib/async-cache-queue";
