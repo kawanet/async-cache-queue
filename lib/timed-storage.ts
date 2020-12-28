@@ -12,7 +12,7 @@ interface TimedItem extends IItem {
  * Storage with TTL for each entries
  */
 
-export class TimedStorage extends DataStorage implements IStorage {
+export class TimedStorage<I extends IItem> extends DataStorage<TimedItem> implements IStorage<TimedItem> {
 
     private keys = [] as string[];
 
@@ -20,7 +20,7 @@ export class TimedStorage extends DataStorage implements IStorage {
         super();
     }
 
-    get(key: string): IItem {
+    get(key: string): I {
         const {keys} = this;
         const store = this.store();
         const now = Date.now();
@@ -28,20 +28,20 @@ export class TimedStorage extends DataStorage implements IStorage {
         // garbage collection
         while (keys.length) {
             const first = keys[0];
-            const item: TimedItem = store[first];
+            const item = store[first];
             if (now < item?.ttl) break;
             keys.shift();
             delete store[first];
         }
 
         // cached item
-        return store[key];
+        return store[key] as I;
     }
 
-    set(key: string, item: TimedItem): void {
+    set(key: string, item: I): void {
         const {keys, expires} = this;
         const store = this.store();
-        item.ttl = Date.now() + expires;
+        (item as TimedItem).ttl = Date.now() + expires;
         store[key] = item;
         keys.push(key);
     }

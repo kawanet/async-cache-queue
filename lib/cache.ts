@@ -31,13 +31,13 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
 
     return fn => {
         // pending items which are running and not stored in cache yet
-        const pendItems = new DataStorage();
+        const pendItems = new DataStorage<CacheItem>();
 
         // cache storage for resolved response
-        const okItems = getStorage(cache);
+        const okItems = getStorage<CacheItem>(cache);
 
         // cache storage for rejected response
-        const ngItems = getStorage(negativeCache);
+        const ngItems = getStorage<CacheItem>(negativeCache);
 
         return arg => {
             const key = hasher(arg);
@@ -46,7 +46,7 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
 
             function getItem(): CacheItem {
                 // read from cache
-                const item: CacheItem = pending[key] || okItems.get(key) || ngItems.get(key);
+                const item = pending[key] || okItems.get(key) || ngItems.get(key);
 
                 // run it and save to cache
                 if (!item) {
@@ -101,8 +101,8 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
     }
 }
 
-function getStorage(cache: number): IStorage {
-    if (cache > 0) return new TimedStorage(cache);
-    if (cache < 0) return new SimpleStorage();
-    return new NullStorage();
+function getStorage<I extends IItem>(cache: number): IStorage<I> {
+    if (cache > 0) return new TimedStorage<I>(cache);
+    if (cache < 0) return new SimpleStorage<I>();
+    return new NullStorage<I>();
 }
