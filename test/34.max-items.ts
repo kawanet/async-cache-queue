@@ -33,6 +33,8 @@ describe(TESTNAME, () => {
 
         await WAIT(10);
 
+        await COUNT(100);
         assert.equal(await COUNT(100), 107); // refreshed
+        assert.equal(await COUNT(100), 107); // cached
     });
 });
