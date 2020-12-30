@@ -1,5 +1,5 @@
 /**
- * store-storage.ts
+ * data-storage.ts
  */
 
 export interface IItem {
@@ -10,21 +10,6 @@ export interface IStorage<I extends IItem> {
     get(key: string): I;
 
     set(key: string, item: I): void;
-}
-
-/**
- * /dev/null Storage
- */
-
-export class NullStorage<I extends IItem> implements IStorage<I> {
-
-    get(key: string): I {
-        return;
-    }
-
-    set(key: string, item: I): void {
-        //
-    }
 }
 
 /**
