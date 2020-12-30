@@ -6,23 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="../dist/async-cache-queue.min.js"></script>
     <script>
-        function getDate() {
+        async function getDate() {
             return (new Date).toJSON();
         }
 
-        var cachedDate = ACQ.queueFactory({
-            // cache expires in almost 2 second
+        const cachedDate = ACQ.queueFactory({
+            // cache expires in almost 2 seconds
             cache: 1950
         })(getDate);
 
-        function updateDate() {
-            cachedDate().then(function (value) {
-                document.getElementById('current').innerText = getDate();
-                document.getElementById('result').innerText = value;
-            });
+        async function updateDate() {
+            document.getElementById('current').innerText = await getDate();
+            document.getElementById('result').innerText = await cachedDate();
         }
 
-        var timer;
+        let timer;
 
         function start() {
             timer = setInterval(updateDate, 100);
@@ -52,7 +50,7 @@
     <p>
         <button onclick="start()">start()</button>
         <button onclick="stop()">stop()</button>
-        <button onclick="ACQ.clearCache()">ACQ.clearCache()</button>
+        <button onclick="ACQ.clearCache()">clearCache()</button>
     </p>
     <p><a href="https://github.com/kawanet/async-cache-queue">https://github.com/kawanet/async-cache-queue</a></p>
 </form>
