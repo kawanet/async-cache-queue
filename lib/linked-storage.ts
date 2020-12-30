@@ -97,4 +97,20 @@ export class LinkedStorage<I extends IItem> {
             item = next;
         }
     }
+
+    /**
+     * return an array containing all the elements in proper sequence
+     */
+
+    toArray(): I[] {
+        const array: I[] = [];
+
+        let item = this.last;
+        while (item) {
+            if (item.value) array.push(item as I);
+            item = item.next;
+        }
+
+        return array.reverse();
+    }
 }
