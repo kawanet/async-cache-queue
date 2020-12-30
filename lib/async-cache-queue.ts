@@ -11,7 +11,7 @@ export interface QueueOptions<IN = any, OUT = any> {
     /**
      * Set a cache TTL in milliseconds since a succeeded result resolved.
      * The internal cache feature stores its value as a Promise but not resolved value.
-     * Note that the TTL is applied only for the internal cache but not for external storages.
+     * Note that the TTL is applied only for the internal cache but not for external `storage`.
      * Set `-1` never to expire it.
      *
      * @default `0` to disable the cache.
@@ -22,7 +22,7 @@ export interface QueueOptions<IN = any, OUT = any> {
     /**
      * Set a negative cache TTL in milliseconds since a failed result rejected.
      * The internal cache feature stores its value as a Promise but not rejected reasons.
-     * Note that the negative cache is only work with the internal cache but not with external storages.
+     * Note that the negative cache is only work with the internal cache but not with external `storage`.
      * Set `-1` not to expire it.
      *
      * @default `0` to disable the negative cache.
@@ -42,7 +42,7 @@ export interface QueueOptions<IN = any, OUT = any> {
 
     /**
      * Set a maximum number of items stored in the internal cache.
-     * Note that the restriction is applied only for the internal cache but not for external storages.
+     * Note that the restriction is applied only for the internal cache but not for external `storage`.
      *
      * @default `0` to disables the restriction.
      */

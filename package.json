@@ -1,6 +1,6 @@
 {
   "name": "async-cache-queue",
-  "description": "Lightweight async task queue with cache, timeout and throttle management",
+  "description": "Lightweight asynchronous task queue with cache, timeout and throttle management",
   "version": "0.1.1",
   "author": "Yusuke Kawasaki <u-suke@kawa.net>",
   "bugs": {
@@ -26,6 +26,7 @@
   "files": [
     "LICENSE",
     "README.md",
+    "dist",
     "lib/*.js",
     "types/async-cache-queue.d.ts"
   ],

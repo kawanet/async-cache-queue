@@ -3,48 +3,44 @@
  */
 export interface QueueOptions<IN = any, OUT = any> {
     /**
-     * Set cache TTL in milliseconds since a succeeded result resolved.
+     * Set a cache TTL in milliseconds since a succeeded result resolved.
      * The internal cache feature stores its value as a Promise but not resolved value.
+     * Note that the TTL is applied only for the internal cache but not for external `storage`.
      * Set `-1` never to expire it.
      *
      * @default `0` to disable the cache.
      */
     cache?: number;
     /**
-     * Set negative cache TTL in milliseconds since a failed result rejected.
+     * Set a negative cache TTL in milliseconds since a failed result rejected.
      * The internal cache feature stores its value as a Promise but not rejected reasons.
+     * Note that the negative cache is only work with the internal cache but not with external `storage`.
      * Set `-1` not to expire it.
      *
      * @default `0` to disable the negative cache.
      */
     negativeCache?: number;
     /**
-     * Set refresh interval in milliseconds.
+     * Set a refreshing interval in milliseconds.
      * It executes the function to fetch a new result in background for the next coming request.
-     * Note tha the last cached result is returned for the current running request.
+     * Note that the last cached result is returned for the current running request.
      *
-     * @default `0` to disables the pre-fetch feature.
+     * @default `0` to disables the feature.
      */
     refresh?: number;
     /**
-     * Set an array of strings which indicate the property names of the `arg` object
-     * that should be used as a part of the cache key.
+     * Set a maximum number of items stored in the internal cache.
+     * Note that the restriction is applied only for the internal cache but not for external `storage`.
      *
-     * @default `undefined` to use whole object as a cache key.
+     * @default `0` to disables the restriction.
      */
-    keyNames?: string[];
+    maxItems?: number;
     /**
-     * Set a minimum key length threshold to apply `keyDigest` below.
+     * Set a function to stringify cache key.
      *
-     * @default `64`
+     * @default: `(arg) => JSON.stringify(arg)`
      */
-    enableDigest?: number;
-    /**
-     * Set a function to generate hash string to keep keys in proper length.
-     *
-     * @default `(key) => crypto.createHash("sha1").update(key).digest("hex")`
-     */
-    keyDigest?: (key: string) => string;
+    hasher?: (arg: any) => string;
     /**
      * Set an external key-value storage adapter which has `.get(key)` and `.set(key, val)` methods.
      * Note that the `cache` option above does not affect for the external storage.
