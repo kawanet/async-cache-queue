@@ -2,7 +2,7 @@
  * timed-storage.ts
  */
 
-import {DataStorage, IItem, IStorage} from "./data-storage";
+import {IItem, IStorage} from "./data-storage";
 
 interface LinkedItem extends IItem {
     key?: string;
@@ -17,22 +17,21 @@ interface TimedItem extends LinkedItem {
  * Storage with TTL for each entries
  */
 
-export class TimedStorage<I extends IItem> extends DataStorage<TimedItem> implements IStorage<TimedItem> {
+export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
     private expires: number;
     private maxItems: number;
     private last: LinkedItem = null;
     private size: number = 0;
+    private items = {} as { [key: string]: TimedItem };
 
     constructor(expires: number, maxItems: number) {
-        super();
         this.expires = (expires > 0) && +expires || 0;
         this.maxItems = (maxItems > 0) && +maxItems || 0;
     }
 
     get(key: string): I {
         const {expires} = this;
-        const store = this.store();
-        const item = store[key];
+        const item = this.items[key];
         if (!item) return;
 
         const now = Date.now();
@@ -46,21 +45,20 @@ export class TimedStorage<I extends IItem> extends DataStorage<TimedItem> implem
     set(key: string, _item: I): void {
         const item = _item as TimedItem;
         const {expires, maxItems} = this;
-        const store = this.store();
         const now = Date.now();
 
         // remove duplicated item
-        const dup = store[key];
+        const dup = this.items[key];
         if (dup) {
             if (dup.value) {
-                delete store[dup.key];
+                // delete this.store[dup.key];
                 this.size--;
                 dup.key = dup.value = null;
             }
             this._prune(dup);
         }
 
-        store[key] = item;
+        this.items[key] = item;
         this.size++;
         item.key = key;
 
@@ -130,12 +128,11 @@ export class TimedStorage<I extends IItem> extends DataStorage<TimedItem> implem
      */
 
     private _truncate(item: LinkedItem): void {
-        const store = this.store();
         let prev: LinkedItem;
 
         while (item) {
             if (item.value) {
-                delete store[item.key];
+                delete this.items[item.key];
                 this.size--;
                 item.key = item.value = null;
             }
