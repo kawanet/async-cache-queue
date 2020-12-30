@@ -55,7 +55,7 @@ export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
                 this.size--;
                 dup.key = dup.value = null;
             }
-            this._prune(dup);
+            this._shortcut(dup);
         }
 
         this.items[key] = item;
@@ -78,16 +78,12 @@ export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
         }
     }
 
-    protected _prune(item: LinkedItem): void {
+    protected _shortcut(item: LinkedItem): void {
         let prev: LinkedItem;
 
         while (item && !item.value) {
-            if (prev) {
-                prev.prev = item.prev; // skip item
-            } else {
-                prev = item; // first item
-            }
-
+            if (prev) prev.prev = item.prev; // shortcut link
+            prev = item;
             item = item.prev; // next item
         }
     }
@@ -105,17 +101,14 @@ export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
 
         while (item) {
             if (c >= maxItems) {
-                prev.prev = null; // remove rest
                 this._truncate(item);
                 return;
             }
 
             if (item.value) {
                 c++; // valid item
-            } else if (prev) {
-                prev.prev = item.prev; // skip item
             } else {
-                this.last = item.prev; // first item
+                if (prev) prev.prev = item.prev; // shortcut link
             }
 
             prev = item;
@@ -128,8 +121,6 @@ export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
      */
 
     private _truncate(item: LinkedItem): void {
-        let prev: LinkedItem;
-
         while (item) {
             if (item.value) {
                 delete this.items[item.key];
@@ -137,7 +128,7 @@ export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
                 item.key = item.value = null;
             }
 
-            prev = item;
+            const prev = item;
             item = item.prev; // next item
             prev.prev = null; // terminate link
         }
