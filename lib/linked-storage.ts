@@ -19,10 +19,7 @@ export class LinkedStorage<I extends IItem> {
         const item = value as LinkedItem;
 
         // remove duplicated item
-        const dup: LinkedItem = this.get(key);
-        if (dup) {
-            this.remove(dup);
-        }
+        this.remove(key);
 
         this.items[key] = item;
         this.size++;
@@ -64,8 +61,10 @@ export class LinkedStorage<I extends IItem> {
      * remove given item
      */
 
-    remove(item: LinkedItem): void {
+    remove(key: string): void {
         let prev: LinkedItem;
+        let item: LinkedItem = this.get(key);
+        if (!item) return;
 
         if (item.value) {
             delete this.items[item.key];
@@ -110,6 +109,8 @@ export class LinkedStorage<I extends IItem> {
             if (item.value) array.push(item as I);
             item = item.next;
         }
+
+        // this.size = array.length;
 
         return array.reverse();
     }
