@@ -10,7 +10,7 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
-    "removeComments": true,
+    "removeComments": false,
     "skipLibCheck": true,
     "strictNullChecks": false,
     "target": "ES2018",
