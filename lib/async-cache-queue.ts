@@ -5,7 +5,7 @@
 import {cacheFactory} from "./cache";
 import {concurrencyFactory} from "./concurrency";
 import {timeoutFactory} from "./timeout";
-import {clearCache as _clearCache} from "./data-storage";
+import {clearContainers} from "./container";
 
 export interface QueueOptions<IN = any, OUT = any> {
     /**
@@ -155,5 +155,5 @@ function join<IN, OUT>(prev: FF<IN, OUT>, filter: FF<IN, OUT>): FF<IN, OUT> {
  */
 
 export function clearCache() {
-    _clearCache();
+    clearContainers();
 }

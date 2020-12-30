@@ -1,13 +1,13 @@
 /**
  * store-storage.ts
  */
+import {objectFactory} from "./container";
 
 export interface IItem {
     value: Promise<any>;
 }
 
 type IStorageData<I> = { [key: string]: I };
-type IStorageSet<I> = { [storageID: string]: IStorageData<I> };
 
 export interface IStorage<I extends IItem> {
     get(key: string): I;
@@ -15,22 +15,8 @@ export interface IStorage<I extends IItem> {
     set(key: string, item: I): void;
 }
 
-let storageID = 1;
-
-export function clearCache() {
-    storageID++;
-}
-
-/**
- * Purge-able Storage
- */
-
 export class DataStorage<I> {
-    private stores: IStorageSet<I>;
-
-    store(): IStorageData<I> {
-        return (this.stores && this.stores[storageID]) || ((this.stores = {} as IStorageSet<I>)[storageID] = {});
-    }
+    store = objectFactory(() => ({} as IStorageData<I>));
 }
 
 /**
