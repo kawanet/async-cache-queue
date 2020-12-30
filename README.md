@@ -80,23 +80,23 @@ const memoTask = queueFactory({
     refresh: 60000, // 1 min for pre-fetching next
 })(arg => runTask(arg));
 
-const val1 = await cacheGET(); // this will wait until the first result resolved.
+const val1 = await memoTask(); // this will wait until the first result resolved.
 
 // few seconds later
-const val2 = await cacheGET(); // cached result (val2 === val1) returned without delay.
+const val2 = await memoTask(); // cached result (val2 === val1) returned without delay.
 
 // few minutes later
-const val3 = await cacheGET(); // cached result (val3 === val1) returned without delay. pre-fetching started in background.
+const val3 = await memoTask(); // cached result (val3 === val1) returned without delay. pre-fetching started in background.
 
 // few seconds later
-const val4 = await cacheGET(); // pre-fetched result (val4 !== val1) returned without outward delay.
+const val4 = await memoTask(); // pre-fetched result (val4 !== val1) returned without outward delay.
 ```
 
 ### External Storage
 
 Set `storage` option to enable the other external key-value storage such as
 [Keyv](https://www.npmjs.com/package/keyv).
-Instead of `Promise` returned, the resolved raw value will be stored in the external storage.
+Instead of `Promise` returned, the resolved raw value is stored in the external storage.
 Note that the cache TTL duration must be managed by the external storage.
 `storage` option requires the interface of `get()` and `set()` methods implemented.
 
