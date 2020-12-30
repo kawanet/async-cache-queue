@@ -9,15 +9,10 @@ export class LinkedStorage<I extends IItem> {
     private last: LinkedItem = null;
     private items = {} as { [key: string]: LinkedItem };
     private size: number = 0;
-    private maxItems: number;
-
-    constructor(maxItems: number) {
-        this.maxItems = (maxItems > 0) && +maxItems || 0;
-    }
 
     get(key: string): I {
         const item = this.items[key];
-        if (item?.value) return item as I;
+        if (item && item.value) return item as I;
     }
 
     set(key: string, value: I): void {
@@ -39,11 +34,6 @@ export class LinkedStorage<I extends IItem> {
             item.next = last.value ? last : last.next;
         }
         this.last = item;
-
-        const {maxItems} = this;
-        if (maxItems && this.size > maxItems) {
-            this.limit(maxItems);
-        }
     }
 
     /**
@@ -51,8 +41,10 @@ export class LinkedStorage<I extends IItem> {
      * it costs O(n) as parsing whole of items
      */
 
-    private limit(limit: number): void {
+    limit(limit: number): void {
         let item = this.last;
+
+        if (!(this.size > limit)) return;
 
         while (item) {
             if (0 >= limit) {
@@ -72,7 +64,7 @@ export class LinkedStorage<I extends IItem> {
      * remove given item
      */
 
-    private remove(item: LinkedItem): void {
+    remove(item: LinkedItem): void {
         let prev: LinkedItem;
 
         if (item.value) {
@@ -92,7 +84,7 @@ export class LinkedStorage<I extends IItem> {
      * remove rest of items
      */
 
-    protected truncate(item: LinkedItem): void {
+    truncate(item: LinkedItem): void {
         while (item) {
             if (item.value) {
                 delete this.items[item.key];
