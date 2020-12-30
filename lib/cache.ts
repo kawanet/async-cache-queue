@@ -3,15 +3,18 @@
  */
 
 import {QueueOptions} from "./async-cache-queue";
-import {DataStorage, IItem, IStorage, NullStorage, SimpleStorage} from "./data-storage";
+import {IItem, IStorage, SimpleStorage} from "./data-storage";
 import {TimedStorage} from "./timed-storage";
+import {objectFactory} from "./container";
 
 interface CacheItem extends IItem {
     refresh?: number;
 }
 
+type PendStorage = { [key: string]: CacheItem };
+
 export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>)) {
-    let {cache, hasher, negativeCache, refresh} = options;
+    let {cache, hasher, maxItems, negativeCache, refresh, storage} = options;
 
     cache = +cache || 0;
     negativeCache = +negativeCache || 0;
@@ -31,29 +34,29 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
 
     return fn => {
         // pending items which are running and not stored in cache yet
-        const pendItems = new DataStorage();
+        const pendItems = objectFactory(() => ({} as PendStorage)); // new Object()
 
         // cache storage for resolved response
-        const okItems = getStorage(cache);
+        const okItems = getStorage<CacheItem>(cache, maxItems);
 
         // cache storage for rejected response
-        const ngItems = getStorage(negativeCache);
+        const ngItems = getStorage<CacheItem>(negativeCache, maxItems);
 
         return arg => {
             const key = hasher(arg);
-            const pending = pendItems.store();
+            const pending = pendItems();
             return getItem().value;
 
             function getItem(): CacheItem {
                 // read from cache
-                const item: CacheItem = pending[key] || okItems.get(key) || ngItems.get(key);
+                const item = pending[key] || (okItems && okItems().get(key)) || (ngItems && ngItems().get(key));
 
                 // run it and save to cache
                 if (!item) {
                     return pending[key] = makeItem();
                 }
 
-                // refresh cache in background
+                // refresh cache in background for the next coming request
                 if (refresh && Date.now() > item.refresh) {
                     delete item.refresh;
                     makeItem();
@@ -64,7 +67,7 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
 
             function makeItem(): CacheItem {
                 const item: CacheItem = {
-                    value: Promise.resolve(arg).then(fn),
+                    value: storage ? startWithStorage() : start()
                 };
 
                 // unresolved cache could be refreshed
@@ -72,10 +75,10 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
 
                 item.value.then(() => {
                     // save it when resolved
-                    return okItems.set(key, item);
+                    if (okItems) return okItems().set(key, item);
                 }, () => {
                     // save it even when rejected
-                    return ngItems.set(key, item);
+                    if (ngItems) return ngItems().set(key, item);
                 }).then(() => {
                     // the cache should be refreshed after given msec
                     if (refresh > 0) item.refresh = Date.now() + refresh;
@@ -86,12 +89,22 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
 
                 return item;
             }
+
+            function start() {
+                return Promise.resolve(arg).then(fn);
+            }
+
+            function startWithStorage() {
+                return Promise.resolve().then(() => storage.get(key))
+                    .then(cached => (cached != null) ? cached : start()
+                        .then(result => (result == null) ? result :
+                            Promise.resolve().then(() => storage.set(key, result)).then(() => result)));
+            }
         };
     }
 }
 
-function getStorage(cache: number): IStorage {
-    if (cache > 0) return new TimedStorage(cache);
-    if (cache < 0) return new SimpleStorage();
-    return new NullStorage();
+function getStorage<I extends IItem>(expires: number, maxItems: number): () => IStorage<I> {
+    if (expires > 0 || maxItems > 0) return objectFactory(() => new TimedStorage<I>(expires, maxItems));
+    if (expires < 0) return objectFactory(() => new SimpleStorage<I>());
 }

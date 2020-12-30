@@ -2,7 +2,8 @@
  * timed-storage.ts
  */
 
-import {DataStorage, IItem, IStorage} from "./data-storage";
+import {IItem, IStorage} from "./data-storage";
+import {LinkedStorage} from "./linked-storage";
 
 interface TimedItem extends IItem {
     ttl?: number;
@@ -12,37 +13,51 @@ interface TimedItem extends IItem {
  * Storage with TTL for each entries
  */
 
-export class TimedStorage extends DataStorage implements IStorage {
+export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
+    private expires: number;
+    private maxItems: number;
+    private limited: number = 0;
+    private items = new LinkedStorage<I>();
 
-    private keys = [] as string[];
-
-    constructor(private expires: number) {
-        super();
+    constructor(expires: number, maxItems: number) {
+        this.expires = (expires > 0) && +expires || 0;
+        this.maxItems = (maxItems > 0) && +maxItems || 0;
     }
 
-    get(key: string): IItem {
-        const {keys} = this;
-        const store = this.store();
-        const now = Date.now();
+    get(key: string): I {
+        const {expires, items} = this;
+        const item: TimedItem = items.get(key);
+        if (!item) return;
 
-        // garbage collection
-        while (keys.length) {
-            const first = keys[0];
-            const item: TimedItem = store[first];
-            if (now < item?.ttl) break;
-            keys.shift();
-            delete store[first];
+        if (expires) {
+            const now = Date.now();
+            // if the cached items is expired, remove rest of items as expired as well.
+            if (now > item.ttl) {
+                items.truncate(item);
+                return;
+            }
         }
 
-        // cached item
-        return store[key];
+        return item as I;
     }
 
-    set(key: string, item: TimedItem): void {
-        const {keys, expires} = this;
-        const store = this.store();
-        item.ttl = Date.now() + expires;
-        store[key] = item;
-        keys.push(key);
+    set(key: string, value: I): void {
+        const item = value as TimedItem;
+        const {expires, items, maxItems} = this;
+        const now = Date.now();
+
+        if (expires) {
+            item.ttl = now + expires;
+        }
+
+        items.set(key, value);
+
+        if (maxItems && maxItems < items.size) {
+            // wait for maxItems milliseconds after the last .limit() method invoked as it costs O(n)
+            if (!(now < this.limited + maxItems)) {
+                this.limited = now;
+                items.limit(maxItems);
+            }
+        }
     }
 }

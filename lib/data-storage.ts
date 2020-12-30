@@ -1,66 +1,29 @@
 /**
- * store-storage.ts
+ * data-storage.ts
  */
 
 export interface IItem {
     value: Promise<any>;
 }
 
-type IStorageData = { [key: string]: IItem };
-type IStorageSet = { [seq: string]: IStorageData };
+export interface IStorage<I extends IItem> {
+    get(key: string): I;
 
-export interface IStorage {
-    get(key: string): IItem;
-
-    set(key: string, item: IItem): void;
-}
-
-let storageID = 1;
-
-export function clearCache() {
-    storageID++;
-}
-
-/**
- * Purge-able Storage
- */
-
-export class DataStorage {
-    private stores: IStorageSet;
-
-    store(): IStorageData {
-        return (this.stores && this.stores[storageID]) || ((this.stores = {} as IStorageSet)[storageID] = {});
-    }
-}
-
-/**
- * /dev/null Storage
- */
-
-export class NullStorage implements IStorage {
-
-    get(key: string): IItem {
-        return;
-    }
-
-    set(key: string, item: IItem): void {
-        //
-    }
+    set(key: string, item: I): void;
 }
 
 /**
  * Persistent Storage
  */
 
-export class SimpleStorage extends DataStorage implements IStorage {
+export class SimpleStorage<I extends IItem> implements IStorage<I> {
+    private items = {} as { [key: string]: I };
 
-    get(key: string): IItem {
-        const store = this.store();
-        return store[key];
+    get(key: string): I {
+        return this.items[key];
     }
 
-    set(key: string, item: IItem): void {
-        const store = this.store();
-        store[key] = item;
+    set(key: string, item: I): void {
+        this.items[key] = item;
     }
 }

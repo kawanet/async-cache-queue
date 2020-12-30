@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>async-cache-queue browser demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="../dist/async-cache-queue.min.js"></script>
+    <script>
+        function getDate() {
+            return (new Date).toJSON();
+        }
+
+        var cachedDate = ACQ.queueFactory({
+            // cache expires in almost 2 second
+            cache: 1950
+        })(getDate);
+
+        function updateDate() {
+            cachedDate().then(function (value) {
+                document.getElementById('current').innerText = getDate();
+                document.getElementById('result').innerText = value;
+            });
+        }
+
+        var timer;
+
+        function start() {
+            timer = setInterval(updateDate, 100);
+        }
+
+        function stop() {
+            clearInterval(timer);
+        }
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0 2em;
+        }
+        button {
+            border-radius: .5em;
+            padding: .5em;
+            margin-right: 1em;
+        }
+    </style>
+</head>
+<body onload="start()">
+<form onsubmit="return false">
+    <h2>async-cache-queue demo</h2>
+    <p>current date: <span id="current"></span></p>
+    <p>cached date: <span id="result"></span></p>
+    <p>
+        <button onclick="start()">start()</button>
+        <button onclick="stop()">stop()</button>
+        <button onclick="ACQ.clearCache()">ACQ.clearCache()</button>
+    </p>
+    <p><a href="https://github.com/kawanet/async-cache-queue">https://github.com/kawanet/async-cache-queue</a></p>
+</form>
+</body>
+</html>
