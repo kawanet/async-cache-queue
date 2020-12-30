@@ -11,7 +11,7 @@ Lightweight asynchronous task queue with cache, timeout and throttle management
 const {queueFactory, clearCache} = require("async-cache-queue");
 const axios = require("axios");
 
-const enableCache = queueFactory({
+const memoize = queueFactory({
     cache: 3600000, // 1 hour for results resolved
     refresh: 60000, // 1 min for pre-fetching next
     negativeCache: 1000, // 1 sec for errors rejected
@@ -20,10 +20,10 @@ const enableCache = queueFactory({
     concurrency: 10, // 10 process throttled
 });
 
-const cachedGET = enableCache(url => axios.get(url));
+const cacheGET = memoize(url => axios.get(url));
 
 async function loadAPI() {
-    const {data} = await cachedGET("https://example.com/api");
+    const {data} = await cacheGET("https://example.com/api");
     return data;
 }
 
@@ -44,13 +44,13 @@ Set `maxItems` option to limit the maximum number of cached items stored.
 Set `concurrency` option to limit the maximum number of processes running in parallel.
 
 ```js
-const cachedTask = queueFactory({
+const memoTask = queueFactory({
     cache: 3600000, // 1 hour for results resolved
     maxItems: 1000, // 1000 items in memory cache
     concurrency: 10, // 10 process throttled
 })(arg => runTask(arg));
 
-const result = await cachedTask(arg);
+const result = await memoTask(arg);
 ```
 
 ### Negative Caching and Cancellation
@@ -60,10 +60,12 @@ Set `timeout` to cancel the running function when its `Promise` keeps pending st
 Those options work great for cases of network or system related troubles.
 
 ```js
-const cachedTask = queueFactory({
+const memoTask = queueFactory({
     negativeCache: 1000, // 1 sec for errors rejected
     timeout: 10000, // 10 sec for force cancelation
 })(arg => runTask(arg));
+
+memoTask(arg).catch(err => onFailure(err));
 ```
 
 ### Background Prefetching
@@ -73,21 +75,21 @@ It invokes pre-fetching request in background for the next coming request
 if `refresh` milliseconds has past since the last result resolved.
 
 ```js
-const cachedTask = queueFactory({
+const memoTask = queueFactory({
     cache: 3600000, // 1 hour for results resolved
     refresh: 60000, // 1 min for pre-fetching next
 })(arg => runTask(arg));
 
-const val1 = await cachedGET(); // this will wait until the first result resolved.
+const val1 = await cacheGET(); // this will wait until the first result resolved.
 
 // few seconds later
-const val2 = await cachedGET(); // cached result (val2 === val1) returned without delay.
+const val2 = await cacheGET(); // cached result (val2 === val1) returned without delay.
 
 // few minutes later
-const val3 = await cachedGET(); // cached result (val3 === val1) returned without delay. pre-fetching started in background.
+const val3 = await cacheGET(); // cached result (val3 === val1) returned without delay. pre-fetching started in background.
 
 // few seconds later
-const val4 = await cachedGET(); // pre-fetched result (val4 !== val1) returned without outward delay.
+const val4 = await cacheGET(); // pre-fetched result (val4 !== val1) returned without outward delay.
 ```
 
 ### External Storage
@@ -109,7 +111,7 @@ const keyvStorage = new Keyv({
     ttl: 3600000, // 1 hour
 });
 
-const cachedTask = queueFactory({
+const memoTask = queueFactory({
     storage: keyvStorage,
     negativeCache: 1000, // 1 sec for errors rejected
     timeout: 10000, // 10 sec for force cancelation
@@ -128,6 +130,11 @@ const clearCache = require("async-cache-queue").clearCache;
 // clear all caches when kill -HUP signal received.
 process.on("SIGHUP", clearCache);
 ```
+
+## LINKS
+
+- https://github.com/kawanet/async-cache-queue
+- https://www.npmjs.com/package/async-cache-queue
 
 ## MIT LICENSE
 
