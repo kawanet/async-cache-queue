@@ -16,6 +16,7 @@ interface TimedItem extends IItem {
 export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
     private expires: number;
     private maxItems: number;
+    private limited: number = 0;
     private items = new LinkedStorage<I>();
 
     constructor(expires: number, maxItems: number) {
@@ -43,16 +44,20 @@ export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
     set(key: string, value: I): void {
         const item = value as TimedItem;
         const {expires, items, maxItems} = this;
+        const now = Date.now();
 
         if (expires) {
-            const now = Date.now();
             item.ttl = now + expires;
         }
 
         items.set(key, value);
 
-        if (maxItems) {
-            items.limit(maxItems);
+        if (maxItems && maxItems < items.size) {
+            // wait for maxItems milliseconds after the last .limit() method invoked as it costs O(n)
+            if (!(now < this.limited + maxItems)) {
+                this.limited = now;
+                items.limit(maxItems);
+            }
         }
     }
 }

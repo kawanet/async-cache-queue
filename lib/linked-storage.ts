@@ -8,7 +8,7 @@ interface LinkedItem extends IItem {
 export class LinkedStorage<I extends IItem> {
     private last: LinkedItem = null;
     private items = {} as { [key: string]: LinkedItem };
-    private size: number = 0;
+    size: number = 0;
 
     get(key: string): I {
         const item = this.items[key];
@@ -40,8 +40,6 @@ export class LinkedStorage<I extends IItem> {
 
     limit(limit: number): void {
         let item = this.last;
-
-        if (!(this.size > limit)) return;
 
         while (item) {
             if (0 >= limit) {
