@@ -98,7 +98,6 @@ Set `storage` option to enable the other external key-value storage such as
 [Keyv](https://www.npmjs.com/package/keyv).
 Instead of `Promise` returned, the resolved raw value is stored in the external storage.
 Note that the cache TTL duration must be managed by the external storage.
-`storage` option requires the interface of `get()` and `set()` methods implemented.
 
 ```js
 const queueFactory = require("async-cache-queue").queueFactory;
@@ -117,6 +116,15 @@ const memoTask = queueFactory({
     timeout: 10000, // 10 sec for force cancelation
     concurrency: 10, // 10 process throttled
 })(arg => runTask(arg));
+```
+
+`storage` option requires the interface of `get()` and `set()` methods implemented as below.
+
+```typescript
+interface KVS<T> {
+    get(key: string): Promise<T>;
+    set(key: string, value: T): Promise<void>;
+}
 ```
 
 ### Global Erasure
