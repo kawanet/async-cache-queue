@@ -140,7 +140,7 @@ export function queueFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
     }
 
     if (!flow) {
-        flow = fn => arg => Promise.resolve(arg).then(fn)
+        flow = fn => arg => Promise.resolve().then(() => fn(arg))
     }
 
     return fn => flow(fn);

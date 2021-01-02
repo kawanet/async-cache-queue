@@ -91,12 +91,12 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
             }
 
             function start() {
-                return Promise.resolve(arg).then(fn);
+                return Promise.resolve().then(() => fn(arg));
             }
 
             function startWithStorage() {
                 return Promise.resolve().then(() => storage.get(key))
-                    .then(cached => (cached != null) ? cached : start()
+                    .then(cached => (cached != null) ? cached : fn(arg)
                         .then(result => (result == null) ? result :
                             Promise.resolve().then(() => storage.set(key, result)).then(() => result)));
             }

@@ -20,10 +20,10 @@ export function timeoutFactory(timeout: number, fallback?: (arg?: any) => any): 
 
         let timer = setTimeout(() => {
             timer = null;
-            if (!count++) return Promise.resolve(arg).then(fallback).then(resolve, reject);
+            if (!count++) return Promise.resolve().then(() => fallback(arg)).then(resolve, reject);
         }, timeout);
 
-        Promise.resolve(arg).then(fn).then(result => {
+        Promise.resolve().then(() => fn(arg)).then(result => {
             if (timer) clearTimeout(timer);
             if (!count++) resolve(result);
         }, reason => {

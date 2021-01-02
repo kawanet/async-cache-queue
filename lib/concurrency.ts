@@ -14,7 +14,7 @@ export function concurrencyFactory(concurrency: number): (<IN, OUT>(fn: ((arg?: 
         return arg => new Promise((resolve, reject) => {
             const job = () => {
                 running++;
-                return Promise.resolve(arg).then(fn).then(resolve, reject);
+                return Promise.resolve().then(() => fn(arg)).then(resolve, reject);
             };
 
             queue.push(job);
