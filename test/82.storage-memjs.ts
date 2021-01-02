@@ -3,7 +3,7 @@
 /**
  * @example
  * docker run -d -p 11211:11211 --name memcached memcached
- * MEMCACHE_SERVERS=localhost:11211 mocha test/32.storage-memjs
+ * MEMCACHE_SERVERS=localhost:11211 mocha test/82.storage-memjs.js
  */
 
 import {strict as assert} from "assert";

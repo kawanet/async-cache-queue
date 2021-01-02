@@ -3,7 +3,7 @@
 /**
  * @example
  * docker run -d -p 11211:11211 --name memcached memcached
- * MEMCACHE_SERVERS=localhost:11211 mocha test/31.storage-keyv
+ * MEMCACHE_SERVERS=localhost:11211 mocha test/81.storage-keyv.js
  */
 
 import {strict as assert} from "assert";
@@ -21,7 +21,11 @@ const DESCRIBE = MEMCACHE_SERVERS ? describe : describe.skip;
 // an unique prefix added for test purpose
 const PREFIX = TESTNAME + ":" + Date.now() + ":";
 
+let onEnd: () => void;
+
 DESCRIBE(TESTNAME, () => {
+    after(() => onEnd && onEnd());
+
     {
         it("object", async function () {
             this.timeout(1000);
@@ -205,11 +209,16 @@ DESCRIBE(TESTNAME, () => {
     }
 });
 
+let memcache: Store<any>;
+
 function getKeyv<T = any>(namespace: string): KVS<T> {
     const Keyv = require('keyv');
     const KeyvMemcache = require('keyv-memcache');
 
-    const memcache: Store<T> = new KeyvMemcache(MEMCACHE_SERVERS);
+    if (!memcache) {
+        memcache = new KeyvMemcache(MEMCACHE_SERVERS);
+        onEnd = () => (memcache as any).client.close();
+    }
 
     const options: Options<T> = {
         namespace: PREFIX + namespace,

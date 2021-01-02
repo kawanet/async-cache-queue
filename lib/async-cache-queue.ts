@@ -104,9 +104,9 @@ export interface QueueOptions<IN = any, OUT = any> {
  */
 
 export interface KVS<T = any> {
-    get(key: string): Promise<T>;
+    get(key: string): T | Promise<T>;
 
-    set(key: string, value: T): Promise<void>;
+    set(key: string, value: T): void | Promise<void> | this;
 }
 
 type FF<IN, OUT> = (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>));
