@@ -25,7 +25,7 @@ export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
     }
 
     get(key: string): I {
-        const {expires, items} = this;
+        const {expires, items, maxItems} = this;
         const item: TimedItem = items.get(key);
         if (!item) return;
 
@@ -38,26 +38,37 @@ export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
             }
         }
 
+        if (maxItems && maxItems < items.size) {
+            this.limit();
+        }
+
         return item as I;
     }
 
     set(key: string, value: I): void {
         const item = value as TimedItem;
         const {expires, items, maxItems} = this;
-        const now = Date.now();
 
         if (expires) {
+            const now = Date.now();
             item.ttl = now + expires;
         }
 
         items.set(key, value);
 
         if (maxItems && maxItems < items.size) {
-            // wait for maxItems milliseconds after the last .limit() method invoked as it costs O(n)
-            if (!(now < this.limited + maxItems)) {
-                this.limited = now;
-                items.limit(maxItems);
-            }
+            this.limit();
+        }
+    }
+
+    private limit() {
+        const {items, maxItems} = this;
+        const now = Date.now();
+
+        // wait for maxItems milliseconds after the last .limit() method invoked as it costs O(n)
+        if (!(now < this.limited + maxItems)) {
+            this.limited = now;
+            items.limit(maxItems);
         }
     }
 }
