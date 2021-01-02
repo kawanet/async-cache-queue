@@ -15,6 +15,7 @@
     "@types/mocha": "^8.2.0",
     "@types/node": "^14.14.14",
     "browserify": "^17.0.0",
+    "key-value-compress": "^0.1.1",
     "keyv": "^4.0.3",
     "keyv-memcache": "^1.0.1",
     "memjs": "^1.2.2",
