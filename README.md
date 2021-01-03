@@ -2,7 +2,7 @@
 
 Lightweight asynchronous task queue with cache, timeout and throttle management
 
-[![Node.js CI](https://github.com/kawanet/async-cache-queue/workflows/Node.js%20CI/badge.svg?branch=master)](https://github.com/kawanet/async-cache-queue/actions/)
+[![Node.js CI](https://github.com/kawanet/async-cache-queue/workflows/Node.js%20CI/badge.svg?branch=main)](https://github.com/kawanet/async-cache-queue/actions/)
 [![npm version](https://badge.fury.io/js/async-cache-queue.svg)](https://www.npmjs.com/package/async-cache-queue)
 
 ## SYNOPSIS
@@ -32,7 +32,7 @@ process.on("SIGHUP", clearCache);
 ```
 
 See TypeScript declaration
-[async-cache-queue.d.ts](https://github.com/kawanet/async-cache-queue/blob/master/types/async-cache-queue.d.ts)
+[async-cache-queue.d.ts](https://github.com/kawanet/async-cache-queue/blob/main/types/async-cache-queue.d.ts)
 for more details.
 
 ## FEATURES
