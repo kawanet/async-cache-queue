@@ -9,7 +9,8 @@
 import {strict as assert} from "assert";
 import {Store, Options} from "keyv";
 
-import {KVS, queueFactory, QueueOptions} from "../lib/async-cache-queue";
+import {queueFactory} from "../lib/async-cache-queue";
+import {KVS, QueueOptions} from "../types/async-cache-queue";
 
 const TESTNAME = __filename.replace(/^.*\//, "");
 const WAIT = (ms: number) => new Promise(resolve => setTimeout(() => resolve(ms), ms));

@@ -2,7 +2,7 @@
  * cache.ts
  */
 
-import {QueueOptions} from "./async-cache-queue";
+import {QueueOptions} from "../types/async-cache-queue";
 import {Envelope, EnvelopeKVS, SimpleStorage} from "./data-storage";
 import {TimedStorage} from "./timed-storage";
 import {objectFactory} from "./container";

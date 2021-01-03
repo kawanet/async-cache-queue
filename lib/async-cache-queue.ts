@@ -6,8 +6,7 @@ import {cacheFactory} from "./cache";
 import {concurrencyFactory} from "./concurrency";
 import {timeoutFactory} from "./timeout";
 import {clearContainers} from "./container";
-import {KVS, QueueOptions} from "../types/async-cache-queue";
-export {KVS, QueueOptions};
+import {QueueOptions} from "../types/async-cache-queue";
 
 type FF<IN, OUT> = (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>));
 
