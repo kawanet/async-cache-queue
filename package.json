@@ -47,7 +47,7 @@
     "url": "git+https://github.com/kawanet/async-cache-queue.git"
   },
   "scripts": {
-    "build": "./node_modules/.bin/tsc -p .",
+    "build": "./node_modules/.bin/tsc -p . && make -C browser dist",
     "build-browser": "make -C browser clean all",
     "fixpack": "fixpack",
     "mocha": "./node_modules/.bin/mocha -R spec test/*.js",

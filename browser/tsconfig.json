@@ -1,7 +1,6 @@
 {
   "include": [
-    "../lib",
-    "../test"
+    "../lib"
   ],
   "compilerOptions": {
     "module": "commonjs",
@@ -11,7 +10,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "removeComments": true,
-    "outDir": "../build",
+    "outDir": "../build/lib",
     "skipLibCheck": true,
     "strictNullChecks": false,
     "target": "ES5"
