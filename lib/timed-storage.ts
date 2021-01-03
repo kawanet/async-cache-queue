@@ -2,10 +2,10 @@
  * timed-storage.ts
  */
 
-import {IItem, IStorage} from "./data-storage";
+import {Envelope, EnvelopeKVS} from "./data-storage";
 import {LinkedStorage} from "./linked-storage";
 
-interface TimedItem extends IItem {
+interface TimedEnvelope<T> extends Envelope<T> {
     ttl?: number;
 }
 
@@ -13,20 +13,20 @@ interface TimedItem extends IItem {
  * Storage with TTL for each entries
  */
 
-export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
+export class TimedStorage<E extends Envelope<T>, T = any> implements EnvelopeKVS<E> {
     private expires: number;
     private maxItems: number;
     private limited: number = 0;
-    private items = new LinkedStorage<I>();
+    private items = new LinkedStorage<TimedEnvelope<T>>();
 
     constructor(expires: number, maxItems: number) {
         this.expires = (expires > 0) && +expires || 0;
         this.maxItems = (maxItems > 0) && +maxItems || 0;
     }
 
-    get(key: string): I {
+    get(key: string): E {
         const {expires, items, maxItems} = this;
-        const item: TimedItem = items.get(key);
+        const item = items.get(key);
         if (!item) return;
 
         if (expires) {
@@ -42,11 +42,11 @@ export class TimedStorage<I extends IItem> implements IStorage<TimedItem> {
             this.limit();
         }
 
-        return item as I;
+        return item as E;
     }
 
-    set(key: string, value: I): void {
-        const item = value as TimedItem;
+    set(key: string, value: E): void {
+        const item = value as TimedEnvelope<T>;
         const {expires, items, maxItems} = this;
 
         if (expires) {

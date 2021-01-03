@@ -3,15 +3,15 @@
  */
 
 import {QueueOptions} from "./async-cache-queue";
-import {IItem, IStorage, SimpleStorage} from "./data-storage";
+import {Envelope, EnvelopeKVS, SimpleStorage} from "./data-storage";
 import {TimedStorage} from "./timed-storage";
 import {objectFactory} from "./container";
 
-interface CacheItem extends IItem {
+interface Item<T> extends Envelope<Promise<T>> {
     refresh?: number;
 }
 
-type PendStorage = { [key: string]: CacheItem };
+type PendStorage<T> = { [key: string]: Item<T> };
 
 export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>)) {
     let {cache, hasher, maxItems, negativeCache, refresh, storage} = options;
@@ -32,24 +32,24 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
         throw new Error("Invalid hasher: " + hasher);
     }
 
-    return fn => {
+    return <IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => {
         // pending items which are running and not stored in cache yet
-        const pendItems = objectFactory(() => ({} as PendStorage)); // new Object()
+        const pendItems = objectFactory(() => ({} as PendStorage<OUT>)); // new Object()
 
         // cache storage for resolved response
-        const okItems = getStorage<CacheItem>(cache, maxItems);
+        const okItems = getStorage<Item<OUT>>(cache, maxItems);
 
         // cache storage for rejected response
-        const ngItems = getStorage<CacheItem>(negativeCache, maxItems);
+        const ngItems = getStorage<Item<OUT>>(negativeCache, maxItems);
 
-        return arg => {
+        return (arg?: IN): Promise<OUT> => {
             const key = hasher(arg);
             const pending = pendItems();
             return getItem().value;
 
-            function getItem(): CacheItem {
+            function getItem(): Item<OUT> {
                 // read from cache
-                const item = pending[key] || (okItems && okItems().get(key)) || (ngItems && ngItems().get(key));
+                const item: Item<OUT> = pending[key] || (okItems && okItems().get(key)) || (ngItems && ngItems().get(key));
 
                 // run it and save to cache
                 if (!item) {
@@ -65,8 +65,8 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
                 return item;
             }
 
-            function makeItem(): CacheItem {
-                const item: CacheItem = {
+            function makeItem(): Item<OUT> {
+                const item: Item<OUT> = {
                     value: storage ? startWithStorage() : start()
                 };
 
@@ -104,7 +104,7 @@ export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
     }
 }
 
-function getStorage<I extends IItem>(expires: number, maxItems: number): () => IStorage<I> {
-    if (expires > 0 || maxItems > 0) return objectFactory(() => new TimedStorage<I>(expires, maxItems));
-    if (expires < 0) return objectFactory(() => new SimpleStorage<I>());
+function getStorage<E extends Envelope<any>>(expires: number, maxItems: number): () => EnvelopeKVS<E> {
+    if (expires > 0 || maxItems > 0) return objectFactory(() => new TimedStorage<E>(expires, maxItems));
+    if (expires < 0) return objectFactory(() => new SimpleStorage<E>());
 }

@@ -1,25 +1,25 @@
-import {IItem} from "./data-storage";
+import {Envelope, EnvelopeKVS} from "./data-storage";
 
-interface LinkedItem extends IItem {
+interface LinkedEnvelope<T> extends Envelope<T> {
     key?: string;
-    next?: LinkedItem;
+    next?: LinkedEnvelope<T>;
 }
 
-export class LinkedStorage<I extends IItem> {
-    private last: LinkedItem = null;
-    private items = {} as { [key: string]: LinkedItem };
+export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKVS<E> {
+    private last: LinkedEnvelope<T> = null;
+    private items = {} as { [key: string]: LinkedEnvelope<T> };
     size: number = 0;
 
-    get(key: string): I {
+    get(key: string): E {
         const item = this.items[key];
-        if (item && item.value) return item as I;
+        if (item && item.value) return item as E;
     }
 
-    set(key: string, value: I): void {
-        const item = value as LinkedItem;
+    set(key: string, value: E): void {
+        const item = value as LinkedEnvelope<T>;
 
         // remove duplicated item
-        this.remove(key);
+        this.delete(key);
 
         this.items[key] = item;
         this.size++;
@@ -43,7 +43,7 @@ export class LinkedStorage<I extends IItem> {
 
         while (item) {
             if (0 >= limit) {
-                this.truncate(item);
+                this.truncate(item as E);
                 return;
             }
 
@@ -59,9 +59,9 @@ export class LinkedStorage<I extends IItem> {
      * remove given item
      */
 
-    remove(key: string): void {
-        let prev: LinkedItem;
-        let item: LinkedItem = this.get(key);
+    delete(key: string): void {
+        let prev: LinkedEnvelope<T>;
+        let item: LinkedEnvelope<T> = this.get(key);
         if (!item) return;
 
         if (item.value) {
@@ -81,7 +81,9 @@ export class LinkedStorage<I extends IItem> {
      * remove rest of items
      */
 
-    truncate(item: LinkedItem): void {
+    truncate(value: E): void {
+        let item = value as LinkedEnvelope<T>;
+
         while (item) {
             if (item.value) {
                 delete this.items[item.key];
@@ -99,12 +101,12 @@ export class LinkedStorage<I extends IItem> {
      * return an array containing all the elements in proper sequence
      */
 
-    toArray(): I[] {
-        const array: I[] = [];
+    values(): E[] {
+        const array: E[] = [];
 
         let item = this.last;
         while (item) {
-            if (item.value) array.push(item as I);
+            if (item.value) array.push(item as E);
             item = item.next;
         }
 

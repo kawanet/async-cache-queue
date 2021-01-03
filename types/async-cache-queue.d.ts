@@ -50,7 +50,7 @@ export interface QueueOptions<IN = any, OUT = any> {
      * @default: `(arg) => JSON.stringify(arg)`
      */
 
-    hasher?: (arg: any) => string;
+    hasher?: (arg: IN) => string;
 
     /**
      * Set an external key-value storage adapter which has `.get(key)` and `.set(key, val)` methods.

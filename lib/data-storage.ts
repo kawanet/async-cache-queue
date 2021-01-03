@@ -2,28 +2,28 @@
  * data-storage.ts
  */
 
-export interface IItem {
-    value: Promise<any>;
+export interface Envelope<T> {
+    value: T;
 }
 
-export interface IStorage<I extends IItem> {
-    get(key: string): I;
+export interface EnvelopeKVS<E extends Envelope<any>> {
+    get(key: string): E;
 
-    set(key: string, item: I): void;
+    set(key: string, value: E): void;
 }
 
 /**
  * Persistent Storage
  */
 
-export class SimpleStorage<I extends IItem> implements IStorage<I> {
-    private items = {} as { [key: string]: I };
+export class SimpleStorage<E extends Envelope<any>> implements EnvelopeKVS<E> {
+    private items = {} as { [key: string]: E };
 
-    get(key: string): I {
+    get(key: string): E {
         return this.items[key];
     }
 
-    set(key: string, item: I): void {
-        this.items[key] = item;
+    set(key: string, value: E): void {
+        this.items[key] = value;
     }
 }

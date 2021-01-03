@@ -59,28 +59,28 @@ describe(TESTNAME, () => {
 
         assert.deepEqual(await getArray(store), [1, 2, 3, 4, 5]);
 
-        store.remove("1");
+        store.delete("1");
         assert.equal(await store.get("1")?.value, undefined);
         assert.deepEqual(await getArray(store), [2, 3, 4, 5]);
 
-        store.remove("5");
+        store.delete("5");
         assert.equal(await store.get("5")?.value, undefined);
         assert.deepEqual(await getArray(store), [2, 3, 4]);
 
-        store.remove("3");
+        store.delete("3");
         assert.equal(await store.get("3")?.value, undefined);
         assert.deepEqual(await getArray(store), [2, 4]);
 
-        store.remove("2");
+        store.delete("2");
         assert.equal(await store.get("2")?.value, undefined);
         assert.deepEqual(await getArray(store), [4]);
 
-        store.remove("4");
+        store.delete("4");
         assert.equal(await store.get("4")?.value, undefined);
         assert.deepEqual(await getArray(store), []);
     });
 });
 
 async function getArray<T = any>(store: LinkedStorage<any>): Promise<T[]> {
-    return Promise.all(store.toArray().map(item => item.value));
+    return Promise.all(store.values().map(item => item.value));
 }
