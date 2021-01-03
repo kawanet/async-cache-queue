@@ -1,18 +1,23 @@
+/**
+ * linked-storage.ts
+ */
+
 import {Envelope, EnvelopeKVS} from "./data-storage";
 
 interface LinkedEnvelope<T> extends Envelope<T> {
     key?: string;
     next?: LinkedEnvelope<T>;
+    deleted?: boolean;
 }
 
 export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKVS<E> {
-    private last: LinkedEnvelope<T> = null;
+    private latest: LinkedEnvelope<T> = null;
     private items = {} as { [key: string]: LinkedEnvelope<T> };
-    size: number = 0;
+    private length: number = 0;
 
     get(key: string): E {
         const item = this.items[key];
-        if (item && item.value) return item as E;
+        if (item && !item.deleted) return item as E;
     }
 
     set(key: string, value: E): void {
@@ -22,15 +27,19 @@ export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKV
         this.delete(key);
 
         this.items[key] = item;
-        this.size++;
+        this.length++;
         item.key = key;
 
         // append at the end of the linked list
-        const last = this.last;
-        if (last) {
-            item.next = last.value ? last : last.next;
+        const latest = this.latest;
+        if (latest) {
+            item.next = latest.deleted ? latest.next : latest;
         }
-        this.last = item;
+        this.latest = item;
+    }
+
+    size(): number {
+        return this.length;
     }
 
     /**
@@ -38,17 +47,17 @@ export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKV
      * it costs O(n) as parsing whole of items
      */
 
-    limit(limit: number): void {
-        let item = this.last;
+    shrink(size: number): void {
+        let item = this.latest;
 
         while (item) {
-            if (0 >= limit) {
+            if (0 >= size) {
                 this.truncate(item as E);
                 return;
             }
 
-            if (item.value) {
-                limit--;
+            if (!item.deleted) {
+                size--;
             }
 
             item = item.next; // next item
@@ -60,17 +69,22 @@ export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKV
      */
 
     delete(key: string): void {
-        let prev: LinkedEnvelope<T>;
-        let item: LinkedEnvelope<T> = this.get(key);
-        if (!item) return;
+        let item = this.get(key);
+        if (item) this._delete(item);
+    }
 
-        if (item.value) {
+    private _delete(item: LinkedEnvelope<T>): void {
+        if (!item) return;
+        let prev: LinkedEnvelope<T>;
+
+        if (!item.deleted) {
             delete this.items[item.key];
-            this.size--;
+            this.length--;
             item.key = item.value = null;
+            item.deleted = true;
         }
 
-        while (item && !item.value) {
+        while (item && item.deleted) {
             if (prev) prev.next = item.next; // shortcut link
             prev = item;
             item = item.next; // next item
@@ -78,22 +92,15 @@ export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKV
     }
 
     /**
-     * remove rest of items
+     * remove given item and rest of items
      */
 
     truncate(value: E): void {
         let item = value as LinkedEnvelope<T>;
 
         while (item) {
-            if (item.value) {
-                delete this.items[item.key];
-                this.size--;
-                item.key = item.value = null;
-            }
-
-            const next = item.next; // next item
-            item.next = null;
-            item = next;
+            this._delete(item);
+            item = item.next; // next item
         }
     }
 
@@ -104,9 +111,9 @@ export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKV
     values(): E[] {
         const array: E[] = [];
 
-        let item = this.last;
+        let item = this.latest;
         while (item) {
-            if (item.value) array.push(item as E);
+            if (!item.deleted) array.push(item as E);
             item = item.next;
         }
 

@@ -38,7 +38,7 @@ describe(TESTNAME, () => {
         assert.equal(await store.get("5")?.value, 5);
         assert.deepEqual(await getArray(store), [1, 2, 3, 4, 5]);
 
-        store.limit(3);
+        store.shrink(3);
 
         assert.equal(await store.get("1")?.value, undefined);
         assert.equal(await store.get("2")?.value, undefined);

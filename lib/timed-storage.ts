@@ -38,8 +38,8 @@ export class TimedStorage<E extends Envelope<T>, T = any> implements EnvelopeKVS
             }
         }
 
-        if (maxItems && maxItems < items.size) {
-            this.limit();
+        if (maxItems && maxItems < items.size()) {
+            this._checkSize();
         }
 
         return item as E;
@@ -56,19 +56,19 @@ export class TimedStorage<E extends Envelope<T>, T = any> implements EnvelopeKVS
 
         items.set(key, value);
 
-        if (maxItems && maxItems < items.size) {
-            this.limit();
+        if (maxItems && maxItems < items.size()) {
+            this._checkSize();
         }
     }
 
-    private limit() {
+    private _checkSize() {
         const {items, maxItems} = this;
         const now = Date.now();
 
         // wait for maxItems milliseconds after the last .limit() method invoked as it costs O(n)
         if (!(now < this.limited + maxItems)) {
             this.limited = now;
-            items.limit(maxItems);
+            items.shrink(maxItems);
         }
     }
 }
