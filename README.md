@@ -95,9 +95,11 @@ const val4 = await memoTask(); // pre-fetched result (val4 !== val1) returned wi
 ### External Storage
 
 Set `storage` option to enable the other external key-value storage such as
-[Keyv](https://www.npmjs.com/package/keyv).
+[Keyv](https://www.npmjs.com/package/keyv),
+[key-value-compress](https://www.npmjs.com/package/key-value-compress), etc.
 Instead of `Promise` returned, the resolved raw value is stored in the external storage.
 Note that the cache TTL duration must be managed by the external storage.
+`cache`, `maxItems` and `refresh` options do not affect to the external storage.
 
 ```js
 const queueFactory = require("async-cache-queue").queueFactory;
@@ -122,15 +124,15 @@ const memoTask = queueFactory({
 
 ```typescript
 interface KVS<T> {
-    get(key: string): Promise<T>;
-    set(key: string, value: T): Promise<void>;
+    get(key: string): T | Promise<T>;
+    set(key: string, value: T): void | Promise<void> | this;
 }
 ```
 
 ### Global Erasure
 
-Call `clearCache()` method to clear all internal caches managed by the module by a single call.
-Note that it doesn't affect to external caches managed by `storage`.
+Call `clearCache()` method to clear all items on the internal on-memory cache managed by the module by a single call.
+Note that it doesn't affect to external `storage`s.
 
 ```js
 const clearCache = require("async-cache-queue").clearCache;
@@ -146,7 +148,7 @@ process.on("SIGHUP", clearCache);
 
 ## MIT LICENSE
 
-Copyright (c) 2020 Yusuke Kawasaki
+Copyright (c) 2020-2021 Yusuke Kawasaki
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
