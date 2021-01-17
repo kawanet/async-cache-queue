@@ -73,7 +73,7 @@ export namespace ACQ {
          * @default `undefined` not to connect to any external storage.
          */
 
-        storage?: KVS<OUT>;
+        storage?: KVS<OUT> | MapLike<OUT>;
 
         /**
          * Set a maximum limit number of concurrent working jobs.
@@ -112,8 +112,14 @@ export namespace ACQ {
      */
 
     interface KVS<T = any> {
-        get(key: string): T | Promise<T>;
+        get(key: string): Promise<T>;
 
-        set(key: string, value: T): void | Promise<void> | this;
+        set(key: string, value: T): Promise<any>;
+    }
+
+    interface MapLike<T = any> {
+        get(key: string): T;
+
+        set(key: string, value: T): any;
     }
 }
