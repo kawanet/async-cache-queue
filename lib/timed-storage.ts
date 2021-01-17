@@ -13,13 +13,14 @@ interface Item<T> extends Envelope<T> {
  * Storage with TTL for each entries
  */
 
-export class TimedStorage<T> implements EnvelopeKVS<T> {
+export class TimedStorage<T> extends EnvelopeKVS<T> {
     private expires: number;
     private maxItems: number;
     private limited: number = 0;
     private items = new LinkedStorage<T>();
 
     constructor(expires: number, maxItems: number) {
+        super();
         this.expires = (expires > 0) && +expires || 0;
         this.maxItems = (maxItems > 0) && +maxItems || 0;
     }

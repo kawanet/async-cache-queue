@@ -10,7 +10,7 @@ interface Item<T> extends Envelope<T> {
     deleted?: boolean;
 }
 
-export class LinkedStorage<T> implements EnvelopeKVS<T> {
+export class LinkedStorage<T> extends EnvelopeKVS<T> {
     private latest: Item<T> = null;
     private items = {} as { [key: string]: Item<T> };
     private length: number = 0;
