@@ -7,7 +7,7 @@
  */
 
 import {strict as assert} from "assert";
-import * as zlib from "zlib";
+import {bufferKVS, textKVS} from "memcached-kvs";
 
 import {queueFactory} from "../lib/async-cache-queue";
 import {ACQ} from "../types/async-cache-queue";
@@ -72,7 +72,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<string> => WAIT(1).then(() => counter++).then(() => "x".repeat(num));
 
-            const storage = getJsonKVS("string");
+            const storage = textKVS({memjs, namespace: PREFIX + "string:"});
             const cached = queueFactory({storage})(testFn);
 
             {
@@ -177,7 +177,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<Buffer> => WAIT(1).then(() => counter++).then(() => Buffer.from([num]));
 
-            const storage = getBufferKVS("Buffer");
+            const storage = bufferKVS({memjs, namespace: PREFIX + "Buffer:"});
             const cached = queueFactory({storage})(testFn);
 
             {
@@ -198,30 +198,12 @@ DESCRIBE(TESTNAME, () => {
     }
 
     function getJsonKVS<T>(namespace: string): ACQ.KVS<T> {
+        const storage = textKVS({memjs, namespace: PREFIX + namespace + ":"});
+
         return {
-            get: (key: string): Promise<T> => {
-                key = PREFIX + namespace + ":" + key;
-                return memjs.get(key).then((res: { value: Buffer }) => res?.value && JSON.parse(zlib.inflateSync(res.value) as any as string));
-            },
+            get: (key: string): Promise<T> => storage.get(key).then(value => value && JSON.parse(value)),
 
-            set: (key: string, value: T): Promise<void> => {
-                key = PREFIX + namespace + ":" + key;
-                return memjs.set(key, zlib.deflateSync(JSON.stringify(value)), {}) as Promise<any>;
-            },
-        }
-    }
-
-    function getBufferKVS(prefix: string): ACQ.KVS<Buffer> {
-        return {
-            get: (key: string): Promise<Buffer> => {
-                key = PREFIX + prefix + ":" + key;
-                return memjs.get(key).then((res: { value: Buffer }) => res?.value && zlib.inflateSync(res.value));
-            },
-
-            set: (key: string, value: Buffer): Promise<void> => {
-                key = PREFIX + prefix + ":" + key;
-                return memjs.set(key, zlib.deflateSync(value), {}) as Promise<any>;
-            },
-        }
+            set: (key: string, value: T): Promise<void> => storage.set(key, JSON.stringify(value)),
+        };
     }
 });
