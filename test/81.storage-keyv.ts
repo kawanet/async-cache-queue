@@ -3,11 +3,11 @@
 /**
  * @example
  * docker run -d -p 11211:11211 --name memcached memcached
- * MEMCACHE_SERVERS=localhost:11211 mocha test/81.storage-keyv.js
+ * MEMCACHE_SERVERS=localhost:11211 mocha test
  */
 
 import {strict as assert} from "assert";
-import {Store, Options} from "keyv";
+import {Options} from "keyv";
 
 import {queueFactory} from "../lib/async-cache-queue";
 import {ACQ} from "../types/async-cache-queue";
@@ -22,10 +22,14 @@ const DESCRIBE = MEMCACHE_SERVERS ? describe : describe.skip;
 // an unique prefix added for test purpose
 const PREFIX = TESTNAME + ":" + Date.now() + ":";
 
-let onEnd: () => void;
-
 DESCRIBE(TESTNAME, () => {
-    after(() => onEnd && onEnd());
+    const Keyv = require("keyv");
+    const KeyvMemcache = require("keyv-memcache");
+    const memcache = new KeyvMemcache(MEMCACHE_SERVERS);
+
+    after(() => {
+        (memcache as any).client.close();
+    });
 
     {
         it("object", async function () {
@@ -36,11 +40,8 @@ DESCRIBE(TESTNAME, () => {
                 return {output: arg.input};
             });
 
-            const options: ACQ.Options = {
-                storage: getKeyv("object")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getKeyv("object");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 assert.equal((await cached({input: "foo"}))?.output, "foo");
@@ -72,11 +73,8 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<string> => WAIT(1).then(() => counter++).then(() => "x".repeat(num));
 
-            const options: ACQ.Options = {
-                storage: getKeyv("string")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getKeyv("string");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 assert.equal(await cached(5), "xxxxx");
@@ -110,11 +108,8 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<number> => WAIT(1).then(() => counter++).then(() => num * 10);
 
-            const options: ACQ.Options = {
-                storage: getKeyv("number")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getKeyv("number");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 assert.equal(await cached(100) + 1, 1000 + 1);
@@ -148,11 +143,8 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<boolean> => WAIT(1).then(() => counter++).then(() => !!(num % 2));
 
-            const options: ACQ.Options = {
-                storage: getKeyv("boolean")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getKeyv("boolean");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 assert.equal(await cached(1), true);
@@ -186,11 +178,8 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<Buffer> => WAIT(1).then(() => counter++).then(() => Buffer.from([num]));
 
-            const options: ACQ.Options = {
-                storage: getKeyv("Buffer")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getKeyv("Buffer");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 const buffer = await cached(100);
@@ -208,24 +197,14 @@ DESCRIBE(TESTNAME, () => {
             }
         });
     }
-});
 
-let memcache: Store<any>;
+    function getKeyv<T = any>(namespace: string): ACQ.KVS<T> {
+        const options: Options<T> = {
+            namespace: PREFIX + namespace,
+            store: memcache,
+            ttl: 10000,
+        };
 
-function getKeyv<T = any>(namespace: string): ACQ.KVS<T> {
-    const Keyv = require('keyv');
-    const KeyvMemcache = require('keyv-memcache');
-
-    if (!memcache) {
-        memcache = new KeyvMemcache(MEMCACHE_SERVERS);
-        onEnd = () => (memcache as any).client.close();
+        return new Keyv(options);
     }
-
-    const options: Options<T> = {
-        namespace: PREFIX + namespace,
-        store: memcache,
-        ttl: 10000,
-    };
-
-    return new Keyv(options);
-}
+});

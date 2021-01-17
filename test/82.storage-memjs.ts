@@ -3,11 +3,10 @@
 /**
  * @example
  * docker run -d -p 11211:11211 --name memcached memcached
- * MEMCACHE_SERVERS=localhost:11211 mocha test/82.storage-memjs.js
+ * MEMCACHE_SERVERS=localhost:11211 mocha test
  */
 
 import {strict as assert} from "assert";
-import {Client} from "memjs";
 import * as zlib from "zlib";
 
 import {queueFactory} from "../lib/async-cache-queue";
@@ -24,14 +23,11 @@ const DESCRIBE = MEMCACHE_SERVERS ? describe : describe.skip;
 const PREFIX = TESTNAME + ":" + Date.now() + ":";
 
 DESCRIBE(TESTNAME, () => {
-    let client: Client;
-
-    before(() => {
-        client = require("memjs").Client.create(MEMCACHE_SERVERS, {expires: 30});
-    });
+    const {Client} = require("memjs");
+    const memjs = Client.create(MEMCACHE_SERVERS, {expires: 30});
 
     after(() => {
-        client.close();
+        memjs.close();
     });
 
     {
@@ -43,11 +39,8 @@ DESCRIBE(TESTNAME, () => {
                 return {output: arg.input};
             });
 
-            const options: ACQ.Options = {
-                storage: makeJsonKVS(client, "object")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getJsonKVS("object");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 assert.equal((await cached({input: "foo"}))?.output, "foo");
@@ -79,11 +72,8 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<string> => WAIT(1).then(() => counter++).then(() => "x".repeat(num));
 
-            const options: ACQ.Options = {
-                storage: makeJsonKVS(client, "string")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getJsonKVS("string");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 assert.equal(await cached(5), "xxxxx");
@@ -117,11 +107,8 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<number> => WAIT(1).then(() => counter++).then(() => num * 10);
 
-            const options: ACQ.Options = {
-                storage: makeJsonKVS(client, "number")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getJsonKVS("number");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 assert.equal(await cached(100) + 1, 1000 + 1);
@@ -155,11 +142,8 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<boolean> => WAIT(1).then(() => counter++).then(() => !!(num % 2));
 
-            const options: ACQ.Options = {
-                storage: makeJsonKVS(client, "boolean")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getJsonKVS("boolean");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 assert.equal(await cached(1), true);
@@ -193,11 +177,8 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<Buffer> => WAIT(1).then(() => counter++).then(() => Buffer.from([num]));
 
-            const options: ACQ.Options = {
-                storage: makeBufferKVS(client, "Buffer")
-            };
-
-            const cached = queueFactory(options)(testFn);
+            const storage = getBufferKVS("Buffer");
+            const cached = queueFactory({storage})(testFn);
 
             {
                 const buffer = await cached(100);
@@ -215,32 +196,32 @@ DESCRIBE(TESTNAME, () => {
             }
         });
     }
+
+    function getJsonKVS<T>(namespace: string): ACQ.KVS<T> {
+        return {
+            get: (key: string): Promise<T> => {
+                key = PREFIX + namespace + ":" + key;
+                return memjs.get(key).then((res: { value: Buffer }) => res?.value && JSON.parse(zlib.inflateSync(res.value) as any as string));
+            },
+
+            set: (key: string, value: T): Promise<void> => {
+                key = PREFIX + namespace + ":" + key;
+                return memjs.set(key, zlib.deflateSync(JSON.stringify(value)), {}) as Promise<any>;
+            },
+        }
+    }
+
+    function getBufferKVS(prefix: string): ACQ.KVS<Buffer> {
+        return {
+            get: (key: string): Promise<Buffer> => {
+                key = PREFIX + prefix + ":" + key;
+                return memjs.get(key).then((res: { value: Buffer }) => res?.value && zlib.inflateSync(res.value));
+            },
+
+            set: (key: string, value: Buffer): Promise<void> => {
+                key = PREFIX + prefix + ":" + key;
+                return memjs.set(key, zlib.deflateSync(value), {}) as Promise<any>;
+            },
+        }
+    }
 });
-
-function makeJsonKVS<T>(client: Client, namespace: string): ACQ.KVS<T> {
-    return {
-        get: (key: string): Promise<T> => {
-            key = PREFIX + namespace + ":" + key;
-            return client.get(key).then(({value}) => value && JSON.parse(zlib.inflateSync(value) as any as string));
-        },
-
-        set: (key: string, value: T): Promise<void> => {
-            key = PREFIX + namespace + ":" + key;
-            return client.set(key, zlib.deflateSync(JSON.stringify(value)), {}) as Promise<any>;
-        },
-    }
-}
-
-function makeBufferKVS(client: Client, prefix: string): ACQ.KVS<Buffer> {
-    return {
-        get: (key: string): Promise<Buffer> => {
-            key = PREFIX + prefix + ":" + key;
-            return client.get(key).then(({value}) => value && zlib.inflateSync(value));
-        },
-
-        set: (key: string, value: Buffer): Promise<void> => {
-            key = PREFIX + prefix + ":" + key;
-            return client.set(key, zlib.deflateSync(value), {}) as Promise<any>;
-        },
-    }
-}
