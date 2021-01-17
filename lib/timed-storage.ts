@@ -5,7 +5,7 @@
 import {Envelope, EnvelopeKVS} from "./data-storage";
 import {LinkedStorage} from "./linked-storage";
 
-interface TimedEnvelope<T> extends Envelope<T> {
+interface Item<T> extends Envelope<T> {
     ttl?: number;
 }
 
@@ -13,20 +13,20 @@ interface TimedEnvelope<T> extends Envelope<T> {
  * Storage with TTL for each entries
  */
 
-export class TimedStorage<E extends Envelope<T>, T = any> implements EnvelopeKVS<E> {
+export class TimedStorage<T> implements EnvelopeKVS<T> {
     private expires: number;
     private maxItems: number;
     private limited: number = 0;
-    private items = new LinkedStorage<TimedEnvelope<T>>();
+    private items = new LinkedStorage<T>();
 
     constructor(expires: number, maxItems: number) {
         this.expires = (expires > 0) && +expires || 0;
         this.maxItems = (maxItems > 0) && +maxItems || 0;
     }
 
-    get(key: string): E {
+    getItem(key: string): Envelope<T> {
         const {expires, items, maxItems} = this;
-        const item = items.get(key);
+        const item = items.getItem(key) as Item<T>;
         if (!item) return;
 
         if (expires) {
@@ -42,11 +42,11 @@ export class TimedStorage<E extends Envelope<T>, T = any> implements EnvelopeKVS
             this._checkSize();
         }
 
-        return item as E;
+        return item as Envelope<T>;
     }
 
-    set(key: string, value: E): void {
-        const item = value as TimedEnvelope<T>;
+    setItem(key: string, value: Envelope<T>): void {
+        const item = value as Item<T>;
         const {expires, items, maxItems} = this;
 
         if (expires) {
@@ -54,7 +54,7 @@ export class TimedStorage<E extends Envelope<T>, T = any> implements EnvelopeKVS
             item.ttl = now + expires;
         }
 
-        items.set(key, value);
+        items.setItem(key, value);
 
         if (maxItems && maxItems < items.size()) {
             this._checkSize();

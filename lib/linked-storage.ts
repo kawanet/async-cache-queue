@@ -4,24 +4,24 @@
 
 import {Envelope, EnvelopeKVS} from "./data-storage";
 
-interface LinkedEnvelope<T> extends Envelope<T> {
+interface Item<T> extends Envelope<T> {
     key?: string;
-    next?: LinkedEnvelope<T>;
+    next?: Item<T>;
     deleted?: boolean;
 }
 
-export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKVS<E> {
-    private latest: LinkedEnvelope<T> = null;
-    private items = {} as { [key: string]: LinkedEnvelope<T> };
+export class LinkedStorage<T> implements EnvelopeKVS<T> {
+    private latest: Item<T> = null;
+    private items = {} as { [key: string]: Item<T> };
     private length: number = 0;
 
-    get(key: string): E {
+    getItem(key: string): Envelope<T> {
         const item = this.items[key];
-        if (item && !item.deleted) return item as E;
+        if (item && !item.deleted) return item as Envelope<T>;
     }
 
-    set(key: string, value: E): void {
-        const item = value as LinkedEnvelope<T>;
+    setItem(key: string, value: Envelope<T>): void {
+        const item = value as Item<T>;
 
         // remove duplicated item
         this.delete(key);
@@ -52,7 +52,7 @@ export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKV
 
         while (item) {
             if (0 >= size) {
-                this.truncate(item as E);
+                this.truncate(item as Envelope<T>);
                 return;
             }
 
@@ -69,13 +69,13 @@ export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKV
      */
 
     delete(key: string): void {
-        let item = this.get(key);
+        let item = this.getItem(key);
         if (item) this._delete(item);
     }
 
-    private _delete(item: LinkedEnvelope<T>): void {
+    private _delete(item: Item<T>): void {
         if (!item) return;
-        let prev: LinkedEnvelope<T>;
+        let prev: Item<T>;
 
         if (!item.deleted) {
             delete this.items[item.key];
@@ -95,8 +95,8 @@ export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKV
      * remove given item and rest of items
      */
 
-    truncate(value: E): void {
-        let item = value as LinkedEnvelope<T>;
+    truncate(value: Envelope<T>): void {
+        let item = value as Item<T>;
 
         while (item) {
             this._delete(item);
@@ -108,12 +108,12 @@ export class LinkedStorage<E extends Envelope<T>, T = any> implements EnvelopeKV
      * return an array containing all the elements in proper sequence
      */
 
-    values(): E[] {
-        const array: E[] = [];
+    values(): Envelope<T>[] {
+        const array: Envelope<T>[] = [];
 
         let item = this.latest;
         while (item) {
-            if (!item.deleted) array.push(item as E);
+            if (!item.deleted) array.push(item as Envelope<T>);
             item = item.next;
         }
 
