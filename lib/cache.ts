@@ -2,7 +2,7 @@
  * cache.ts
  */
 
-import {QueueOptions} from "../types/async-cache-queue";
+import {ACQ} from "../types/async-cache-queue";
 import {Envelope, EnvelopeKVS, SimpleStorage} from "./data-storage";
 import {TimedStorage} from "./timed-storage";
 import {objectFactory} from "./container";
@@ -13,7 +13,7 @@ interface Item<T> extends Envelope<Promise<T>> {
 
 type PendStorage<T> = { [key: string]: Item<T> };
 
-export function cacheFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>)) {
+export function cacheFactory(options?: ACQ.Options): (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>)) {
     let {cache, hasher, maxItems, negativeCache, refresh, storage} = options;
 
     cache = +cache || 0;

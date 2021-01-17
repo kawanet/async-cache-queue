@@ -6,7 +6,7 @@ import {cacheFactory} from "./cache";
 import {concurrencyFactory} from "./concurrency";
 import {timeoutFactory} from "./timeout";
 import {clearContainers} from "./container";
-import {QueueOptions} from "../types/async-cache-queue";
+import {ACQ} from "../types/async-cache-queue";
 
 type FF<IN, OUT> = (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>));
 
@@ -14,7 +14,7 @@ type FF<IN, OUT> = (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) =
  * It returns a function to create a queue manager.
  */
 
-export function queueFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>)) {
+export function queueFactory(options?: ACQ.Options): (<IN, OUT>(fn: ((arg?: IN) => Promise<OUT>)) => ((arg?: IN) => Promise<OUT>)) {
     const {
         cache,
         concurrency,
@@ -22,7 +22,7 @@ export function queueFactory(options?: QueueOptions): (<IN, OUT>(fn: ((arg?: IN)
         storage,
         timeout,
         timeoutFallback
-    } = options || {} as QueueOptions;
+    } = options || {} as ACQ.Options;
 
     let flow: FF<any, any> = null;
 

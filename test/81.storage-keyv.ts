@@ -10,7 +10,7 @@ import {strict as assert} from "assert";
 import {Store, Options} from "keyv";
 
 import {queueFactory} from "../lib/async-cache-queue";
-import {KVS, QueueOptions} from "../types/async-cache-queue";
+import {ACQ} from "../types/async-cache-queue";
 
 const TESTNAME = __filename.replace(/^.*\//, "");
 const WAIT = (ms: number) => new Promise(resolve => setTimeout(() => resolve(ms), ms));
@@ -36,7 +36,7 @@ DESCRIBE(TESTNAME, () => {
                 return {output: arg.input};
             });
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: getKeyv("object")
             };
 
@@ -72,7 +72,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<string> => WAIT(1).then(() => counter++).then(() => "x".repeat(num));
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: getKeyv("string")
             };
 
@@ -110,7 +110,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<number> => WAIT(1).then(() => counter++).then(() => num * 10);
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: getKeyv("number")
             };
 
@@ -148,7 +148,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<boolean> => WAIT(1).then(() => counter++).then(() => !!(num % 2));
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: getKeyv("boolean")
             };
 
@@ -186,7 +186,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<Buffer> => WAIT(1).then(() => counter++).then(() => Buffer.from([num]));
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: getKeyv("Buffer")
             };
 
@@ -212,7 +212,7 @@ DESCRIBE(TESTNAME, () => {
 
 let memcache: Store<any>;
 
-function getKeyv<T = any>(namespace: string): KVS<T> {
+function getKeyv<T = any>(namespace: string): ACQ.KVS<T> {
     const Keyv = require('keyv');
     const KeyvMemcache = require('keyv-memcache');
 

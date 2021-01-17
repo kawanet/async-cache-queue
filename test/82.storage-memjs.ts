@@ -11,7 +11,7 @@ import {Client} from "memjs";
 import * as zlib from "zlib";
 
 import {queueFactory} from "../lib/async-cache-queue";
-import {KVS, QueueOptions} from "../types/async-cache-queue";
+import {ACQ} from "../types/async-cache-queue";
 
 const TESTNAME = __filename.replace(/^.*\//, "");
 const WAIT = (ms: number) => new Promise(resolve => setTimeout(() => resolve(ms), ms));
@@ -43,7 +43,7 @@ DESCRIBE(TESTNAME, () => {
                 return {output: arg.input};
             });
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: makeJsonKVS(client, "object")
             };
 
@@ -79,7 +79,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<string> => WAIT(1).then(() => counter++).then(() => "x".repeat(num));
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: makeJsonKVS(client, "string")
             };
 
@@ -117,7 +117,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<number> => WAIT(1).then(() => counter++).then(() => num * 10);
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: makeJsonKVS(client, "number")
             };
 
@@ -155,7 +155,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<boolean> => WAIT(1).then(() => counter++).then(() => !!(num % 2));
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: makeJsonKVS(client, "boolean")
             };
 
@@ -193,7 +193,7 @@ DESCRIBE(TESTNAME, () => {
             let counter = 0;
             const testFn = (num: number): Promise<Buffer> => WAIT(1).then(() => counter++).then(() => Buffer.from([num]));
 
-            const options: QueueOptions = {
+            const options: ACQ.Options = {
                 storage: makeBufferKVS(client, "Buffer")
             };
 
@@ -217,7 +217,7 @@ DESCRIBE(TESTNAME, () => {
     }
 });
 
-function makeJsonKVS<T>(client: Client, namespace: string): KVS<T> {
+function makeJsonKVS<T>(client: Client, namespace: string): ACQ.KVS<T> {
     return {
         get: (key: string): Promise<T> => {
             key = PREFIX + namespace + ":" + key;
@@ -231,7 +231,7 @@ function makeJsonKVS<T>(client: Client, namespace: string): KVS<T> {
     }
 }
 
-function makeBufferKVS(client: Client, prefix: string): KVS<Buffer> {
+function makeBufferKVS(client: Client, prefix: string): ACQ.KVS<Buffer> {
     return {
         get: (key: string): Promise<Buffer> => {
             key = PREFIX + prefix + ":" + key;
