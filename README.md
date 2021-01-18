@@ -98,7 +98,7 @@ Set `storage` option to enable the other external key-value storage such as
 [Keyv](https://www.npmjs.com/package/keyv),
 [key-value-compress](https://www.npmjs.com/package/key-value-compress), etc.
 Instead of `Promise` returned, the resolved raw value is stored in the external storage.
-Note that the cache TTL duration must be managed by the external storage.
+Note that the external cache's TTL duration must be managed by the external storage.
 `cache`, `maxItems` and `refresh` options do not affect to the external storage.
 
 ```js
@@ -124,8 +124,13 @@ const memoTask = queueFactory({
 
 ```typescript
 interface KVS<T> {
-    get(key: string): T | Promise<T>;
-    set(key: string, value: T): void | Promise<void> | this;
+    get(key: string): Promise<T>;
+    set(key: string, value: T): Promise<any>;
+}
+
+interface MapLike<T> {
+    get(key: string): T;
+    set(key: string, value: T): any;
 }
 ```
 

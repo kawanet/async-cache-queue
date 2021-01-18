@@ -30,7 +30,7 @@
     "README.md",
     "dist",
     "lib/*.js",
-    "types/async-cache-queue.d.ts"
+    "types/*.d.ts"
   ],
   "homepage": "https://github.com/kawanet/async-cache-queue#readme",
   "keywords": [
