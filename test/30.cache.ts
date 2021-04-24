@@ -2,14 +2,14 @@
 
 import {strict as assert} from "assert";
 
-import {clearCache, queueFactory} from "../lib/async-cache-queue";
+import {clearCache, queueFactory} from "../";
 
-const TESTNAME = __filename.replace(/^.*\//, "");
+const TITLE = __filename.split("/").pop();
 
 const WAIT = (ms: number) => new Promise(resolve => setTimeout(() => resolve(ms), ms));
 const FAIL = (ms: number) => new Promise((_, reject) => setTimeout(() => reject(ms), ms));
 
-describe(TESTNAME, () => {
+describe(TITLE, () => {
     {
         const opt = {cache: 150};
 

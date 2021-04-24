@@ -19,13 +19,13 @@ all: dist ../build/test.js
 	../node_modules/.bin/tsc -p ..
 	mkdir -p ../build/test
 	cp -p ../test/[1-7][0-9].*.js ../build/test
-	perl -i -pe 's#"../lib/async-cache-queue"#"../../dist/async-cache-queue.min"#' ../build/test/*.js
+	perl -i -pe 's#require\("../(lib/async-cache-queue)?"#require("../../dist/async-cache-queue.min"#' ../build/test/*.js
 	../node_modules/.bin/browserify -o $@ ../build/test/*.js
 
 dist: ../dist/async-cache-queue.min.js
 
 clean:
-	/bin/rm -fr ../build/ *.js
+	/bin/rm -fr ../build/ ../dist/*.js
 
 test: ../build/test.js
 	open ../browser/test.html

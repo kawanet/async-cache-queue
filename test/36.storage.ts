@@ -2,15 +2,15 @@
 
 import {strict as assert} from "assert";
 
-import {queueFactory} from "../lib/async-cache-queue";
+import {queueFactory} from "../";
 
-const TESTNAME = __filename.replace(/^.*\//, "");
+const TITLE = __filename.split("/").pop();
 const WAIT = (ms: number) => new Promise(resolve => setTimeout(() => resolve(ms), ms));
 
 type Input = { input: string };
 type Output = { output: string };
 
-describe(TESTNAME, () => {
+describe(TITLE, () => {
     it("Map", async () => {
         let counter = 0;
         const testFn = (arg: Input): Promise<Output> => WAIT(1).then(() => counter++).then(() => {
