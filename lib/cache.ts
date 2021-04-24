@@ -4,7 +4,7 @@
 
 import {ACQ} from "../types/async-cache-queue";
 import {Envelope, EnvelopeKVS, SimpleStorage} from "./data-storage";
-import {TimedStorage} from "./timed-storage";
+import {TimedKVS} from "timed-kvs";
 import {objectFactory} from "./container";
 
 interface Item<T> extends Envelope<T> {
@@ -105,6 +105,6 @@ export function cacheFactory(options?: ACQ.Options): (<IN, OUT>(fn: ((arg?: IN) 
 }
 
 function getStorage<T>(expires: number, maxItems: number): () => EnvelopeKVS<T> {
-    if (expires > 0 || maxItems > 0) return objectFactory(() => new TimedStorage<T>(expires, maxItems));
+    if (expires > 0 || maxItems > 0) return objectFactory(() => new TimedKVS<T>({expires, maxItems}));
     if (expires < 0) return objectFactory(() => new SimpleStorage<T>());
 }

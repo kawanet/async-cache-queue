@@ -15,37 +15,37 @@ describe(TESTNAME, () => {
         });
 
         let counter = 0;
-        const COUNT = queue<number, number>(async arg => (arg + (++counter)));
+        const COUNT = queue<string, string>(async key => `${key}:${++counter}`);
 
-        assert.equal(await COUNT(100), 101);
-        assert.equal(await COUNT(200), 202);
-        assert.equal(await COUNT(300), 303);
-        assert.equal(await COUNT(400), 404);
-        assert.equal(await COUNT(500), 505);
+        assert.equal(await COUNT("foo"), "foo:1");
+        assert.equal(await COUNT("bar"), "bar:2");
+        assert.equal(await COUNT("buz"), "buz:3");
+        assert.equal(await COUNT("qux"), "qux:4");
+        assert.equal(await COUNT("quux"), "quux:5");
 
         // check cached values
-        assert.equal(await COUNT(100), 101); // cached
-        assert.equal(await COUNT(200), 202);
-        assert.equal(await COUNT(300), 303);
-        assert.equal(await COUNT(400), 404);
-        assert.equal(await COUNT(500), 505);
+        assert.equal(await COUNT("foo"), "foo:1"); // cached
+        assert.equal(await COUNT("bar"), "bar:2");
+        assert.equal(await COUNT("buz"), "buz:3");
+        assert.equal(await COUNT("qux"), "qux:4");
+        assert.equal(await COUNT("quux"), "quux:5");
 
-        // this exceeds maxItems limit and removes 100 then
-        assert.equal(await COUNT(600), 606);
-        assert.equal(await COUNT(600), 606); // cached
+        // this exceeds maxItems limit and removes "foo" then
+        assert.equal(await COUNT("corge"), "corge:6");
+        assert.equal(await COUNT("corge"), "corge:6"); // cached
 
         // wait a moment for garbage collection completed
-        await WAIT(10);
+        await WAIT(1001);
 
-        // this refreshes 100 and removes 200 then
-        assert.equal(await COUNT(100), 107); // refreshed
+        // this refreshes "foo" and removes "bar" then
+        assert.equal(await COUNT("foo"), "foo:7"); // refreshed
+        assert.equal(await COUNT("foo"), "foo:7"); // cached
 
-        // check cached values
-        assert.equal(await COUNT(100), 107); // cached
-        // assert.equal(await COUNT(200), 202); // removed
-        assert.equal(await COUNT(300), 303);
-        assert.equal(await COUNT(400), 404);
-        assert.equal(await COUNT(500), 505);
-        assert.equal(await COUNT(600), 606);
+        // assert.equal(COUNT("bar"), "bar:8"); // removed
+        assert.equal(await COUNT("buz"), "buz:3");
+
+        assert.equal(await COUNT("buz"), "buz:3");
+        assert.equal(await COUNT("qux"), "qux:4");
+        assert.equal(await COUNT("quux"), "quux:5");
     });
 });

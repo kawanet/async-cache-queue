@@ -1,14 +1,20 @@
 {
   "name": "async-cache-queue",
   "description": "Lightweight asynchronous task queue with cache, timeout and throttle management",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Yusuke Kawasaki <u-suke@kawa.net>",
+  "browser": {
+    "timed-kvs": "./node_modules/timed-kvs/dist/timed-kvs.min.js"
+  },
   "bugs": {
     "url": "https://github.com/kawanet/async-cache-queue/issues"
   },
   "contributors": [
     "Yusuke Kawasaki <u-suke@kawa.net>"
   ],
+  "dependencies": {
+    "timed-kvs": "^0.2.0"
+  },
   "devDependencies": {
     "@types/keyv": "^3.1.1",
     "@types/memjs": "^1.2.1",
