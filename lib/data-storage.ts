@@ -1,32 +1,31 @@
 /**
  * data-storage.ts
  */
-import {ACQ} from "../types/async-cache-queue";
+
+import {TimedKVS} from "timed-kvs";
+import {objectFactory} from "./container";
 
 export interface Envelope<T> {
     value: T;
 }
 
-export abstract class EnvelopeKVS<T> implements ACQ.MapLike<T> {
-    get(key: string): T {
-        const item = this.getItem(key);
-        if (item) return item.value;
-    }
+/**
+ * EnvelopeKVS is the interface for synchronous key-value storages
+ * which store enveloped values, instead of naked values.
+ * Both of TimedKVS and SimpleStorage implement the interface.
+ */
 
-    set(key: string, value: T): void {
-        this.setItem(key, {value: value});
-    }
+interface EnvelopeKVS<T> {
+    getItem(key: string): Envelope<T>;
 
-    abstract getItem(key: string): Envelope<T>;
-
-    abstract setItem(key: string, value: Envelope<T>): void;
+    setItem(key: string, value: Envelope<T>): void;
 }
 
 /**
  * Persistent Storage
  */
 
-export class SimpleStorage<T> extends EnvelopeKVS<T> {
+class SimpleStorage<T> implements EnvelopeKVS<T> {
     private items = {} as { [key: string]: Envelope<T> };
 
     getItem(key: string): Envelope<T> {
@@ -36,4 +35,13 @@ export class SimpleStorage<T> extends EnvelopeKVS<T> {
     setItem(key: string, value: Envelope<T>): void {
         this.items[key] = value;
     }
+}
+
+/**
+ * returns a function which returns an EnvelopeKVS instance.
+ */
+
+export function getStorage<T>(expires: number, maxItems: number): () => EnvelopeKVS<T> {
+    if (expires > 0 || maxItems > 0) return objectFactory(() => new TimedKVS<T>({expires, maxItems}));
+    if (expires < 0) return objectFactory(() => new SimpleStorage<T>());
 }

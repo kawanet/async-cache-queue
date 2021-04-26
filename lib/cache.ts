@@ -3,8 +3,7 @@
  */
 
 import {ACQ} from "../types/async-cache-queue";
-import {Envelope, EnvelopeKVS, SimpleStorage} from "./data-storage";
-import {TimedStorage} from "./timed-storage";
+import {Envelope, getStorage} from "./data-storage";
 import {objectFactory} from "./container";
 
 interface Item<T> extends Envelope<T> {
@@ -90,21 +89,21 @@ export function cacheFactory(options?: ACQ.Options): (<IN, OUT>(fn: ((arg?: IN) 
                 return item;
             }
 
+            // run the job without external storage
             function start() {
                 return Promise.resolve().then(() => fn(arg));
             }
 
+            // run the job with external storage
             function startWithStorage() {
-                return Promise.resolve().then(() => storage.get(key))
-                    .then(cached => (cached != null) ? cached : fn(arg)
-                        .then(result => (result == null) ? result :
-                            Promise.resolve().then(() => storage.set(key, result)).then(() => result)));
+                return Promise.resolve().then(() => storage.get(key)).then(cached => {
+                    if (cached != null) return cached;
+                    return Promise.resolve().then(() => fn(arg)).then(result => {
+                        if (result == null) return result;
+                        return Promise.resolve().then(() => storage.set(key, result)).then(() => result)
+                    });
+                });
             }
         };
     }
-}
-
-function getStorage<T>(expires: number, maxItems: number): () => EnvelopeKVS<T> {
-    if (expires > 0 || maxItems > 0) return objectFactory(() => new TimedStorage<T>(expires, maxItems));
-    if (expires < 0) return objectFactory(() => new SimpleStorage<T>());
 }

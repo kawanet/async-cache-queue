@@ -2,16 +2,16 @@
 
 import {strict as assert} from "assert";
 
-import {queueFactory} from "../lib/async-cache-queue";
+import {queueFactory} from "../";
 
-const TESTNAME = __filename.replace(/^.*\//, "");
+const TITLE = __filename.split("/").pop();
 
 interface IN {
     foo?: { bar?: number, buz?: number },
     qux?: number,
 }
 
-describe(TESTNAME, () => {
+describe(TITLE, () => {
     it("JSON.stringify with replacer", async () => {
         const queue = queueFactory({
             cache: -1,

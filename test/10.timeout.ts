@@ -2,13 +2,13 @@
 
 import {strict as assert} from "assert";
 
-import {queueFactory} from "../lib/async-cache-queue";
+import {queueFactory} from "../";
 
-const TESTNAME = __filename.replace(/^.*\//, "");
+const TITLE = __filename.split("/").pop();
 
 const WAIT = (ms: number) => new Promise(resolve => setTimeout(() => resolve(ms), ms));
 
-describe(TESTNAME, () => {
+describe(TITLE, () => {
     {
         const opt = {timeout: 200, timeoutFallback: () => "TIMEOUT"};
 

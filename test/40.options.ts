@@ -2,11 +2,11 @@
 
 import {strict as assert} from "assert";
 
-import {queueFactory} from "../lib/async-cache-queue";
+import {queueFactory} from "../";
 
-const TESTNAME = __filename.replace(/^.*\//, "");
+const TITLE = __filename.split("/").pop();
 
-describe(TESTNAME, () => {
+describe(TITLE, () => {
     {
         it("without options", async function () {
             this.timeout(1000);

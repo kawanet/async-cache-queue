@@ -9,10 +9,10 @@
 import {strict as assert} from "assert";
 import {bufferKVS, textKVS} from "memcached-kvs";
 
-import {queueFactory} from "../lib/async-cache-queue";
+import {queueFactory} from "../";
 import {ACQ} from "../types/async-cache-queue";
 
-const TESTNAME = __filename.replace(/^.*\//, "");
+const TITLE = __filename.split("/").pop();
 const WAIT = (ms: number) => new Promise(resolve => setTimeout(() => resolve(ms), ms));
 
 // run this test only when environment variable specified
@@ -20,9 +20,9 @@ const {MEMCACHE_SERVERS} = process.env;
 const DESCRIBE = MEMCACHE_SERVERS ? describe : describe.skip;
 
 // an unique prefix added for test purpose
-const PREFIX = TESTNAME + ":" + Date.now() + ":";
+const PREFIX = TITLE + ":" + Date.now() + ":";
 
-DESCRIBE(TESTNAME, () => {
+DESCRIBE(TITLE, () => {
     const {Client} = require("memjs");
     const memjs = Client.create(MEMCACHE_SERVERS, {expires: 30});
 
