@@ -150,6 +150,9 @@ process.on("SIGHUP", clearCache);
 
 - https://github.com/kawanet/async-cache-queue
 - https://www.npmjs.com/package/async-cache-queue
+- https://www.npmjs.com/package/key-value-compress
+- https://www.npmjs.com/package/memcached-kvs
+- https://www.npmjs.com/package/timed-kvs
 
 ## MIT LICENSE
 
