@@ -146,6 +146,30 @@ const clearCache = require("async-cache-queue").clearCache;
 process.on("SIGHUP", clearCache);
 ```
 
+## BROWSERS
+
+Less than 7KB minified build available for Web browsers.
+
+- https://raw.githubusercontent.com/kawanet/async-cache-queue/main/dist/async-cache-queue.min.js
+- https://cdn.jsdelivr.net/npm/async-cache-queue/dist/async-cache-queue.min.js
+
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/async-cache-queue/dist/async-cache-queue.min.js"></script>
+<script>
+  const {queueFactory} = ACQ;
+
+  const memoize = queueFactory({
+    cache: 3600000, // 1 hour for results resolved
+    refresh: 60000, // 1 min for pre-fetching next
+    negativeCache: 1000, // 1 sec for errors rejected
+    timeout: 10000, // 10 sec for force cancelation
+    maxItems: 1000, // 1000 items in memory cache
+    concurrency: 10, // 10 process throttled
+  });
+</script>
+```
+
 ## LINKS
 
 - https://github.com/kawanet/async-cache-queue
