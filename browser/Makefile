@@ -5,6 +5,7 @@ all: dist ../build/test.js
 # dist/*.min.js uses ES5
 ../dist/async-cache-queue.min.js: ../build/async-cache-queue.bundle.js
 	../node_modules/.bin/terser -c -m -o $@ $<
+	ls -l $@
 
 ../build/async-cache-queue.bundle.js: ../build/lib/async-cache-queue.js
 	../node_modules/.bin/browserify --list $<
