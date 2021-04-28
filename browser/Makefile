@@ -5,8 +5,10 @@ all: dist ../build/test.js
 # dist/*.min.js uses ES5
 ../dist/async-cache-queue.min.js: ../build/async-cache-queue.bundle.js
 	../node_modules/.bin/terser -c -m -o $@ $<
+	ls -l $@
 
 ../build/async-cache-queue.bundle.js: ../build/lib/async-cache-queue.js
+	../node_modules/.bin/browserify --list $<
 	../node_modules/.bin/browserify -o $@ -s ACQ $<
 	perl -i -pe 's#^("use strict"|Object.defineProperty|exports.*= void 0)#// $$&#' $@
 
@@ -19,7 +21,7 @@ all: dist ../build/test.js
 	../node_modules/.bin/tsc -p ..
 	mkdir -p ../build/test
 	cp -p ../test/[1-7][0-9].*.js ../build/test
-	perl -i -pe 's#require\("../(lib/async-cache-queue)?"#require("../../dist/async-cache-queue.min"#' ../build/test/*.js
+	perl -i -pe 's#require\("../(lib/async-cache-queue)?"#require("../../browser/import"#' ../build/test/*.js
 	../node_modules/.bin/browserify -o $@ ../build/test/*.js
 
 dist: ../dist/async-cache-queue.min.js
