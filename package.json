@@ -1,7 +1,7 @@
 {
   "name": "async-cache-queue",
   "description": "Lightweight asynchronous task queue with cache, timeout and throttle management",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "Yusuke Kawasaki <u-suke@kawa.net>",
   "browser": {
     "timed-kvs": "./node_modules/timed-kvs/dist/timed-kvs.min.js"
@@ -21,6 +21,7 @@
     "@types/mocha": "^8.2.2",
     "@types/node": "^14.14.43",
     "browserify": "^17.0.0",
+    "browserify-sed": "^0.8.0",
     "key-value-compress": "^0.2.0",
     "keyv": "^4.0.3",
     "keyv-memcache": "^1.2.5",
