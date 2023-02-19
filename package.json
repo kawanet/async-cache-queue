@@ -10,7 +10,7 @@
     "Yusuke Kawasaki <u-suke@kawa.net>"
   ],
   "dependencies": {
-    "timed-kvs": "^0.3.2"
+    "timed-kvs": "^0.3.4"
   },
   "devDependencies": {
     "@types/keyv": "^3.1.4",
@@ -55,7 +55,7 @@
     "url": "git+https://github.com/kawanet/async-cache-queue.git"
   },
   "scripts": {
-    "build": "./node_modules/.bin/tsc -p . && make",
+    "build": "./node_modules/.bin/tsc -p . && make clean all",
     "fixpack": "fixpack",
     "mocha": "./node_modules/.bin/mocha -R spec test/*.js",
     "prepack": "npm run build && npm test",
