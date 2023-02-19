@@ -1,18 +1,19 @@
 {
   "include": [
-    "../lib"
+    "./lib"
   ],
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "es2020",
+    "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitReturns": false,
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
-    "removeComments": true,
-    "outDir": "../build/lib",
+    "removeComments": false,
+    "outDir": "./build/esm/",
     "skipLibCheck": true,
     "strictNullChecks": false,
-    "target": "ES5"
+    "target": "es2020"
   }
 }
