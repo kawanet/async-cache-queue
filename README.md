@@ -4,6 +4,7 @@ Lightweight asynchronous task queue with cache, timeout and throttle management
 
 [![Node.js CI](https://github.com/kawanet/async-cache-queue/workflows/Node.js%20CI/badge.svg?branch=main)](https://github.com/kawanet/async-cache-queue/actions/)
 [![npm version](https://badge.fury.io/js/async-cache-queue.svg)](https://www.npmjs.com/package/async-cache-queue)
+[![gzip size](https://img.badgesize.io/https://unpkg.com/async-cache-queue/dist/async-cache-queue.min.js?compression=gzip)](https://unpkg.com/async-cache-queue/dist/async-cache-queue.min.js)
 
 ## SYNOPSIS
 
@@ -150,7 +151,6 @@ process.on("SIGHUP", clearCache);
 
 Less than 7KB minified build available for Web browsers.
 
-- https://raw.githubusercontent.com/kawanet/async-cache-queue/main/dist/async-cache-queue.min.js
 - https://cdn.jsdelivr.net/npm/async-cache-queue/dist/async-cache-queue.min.js
 
 
@@ -180,7 +180,7 @@ Less than 7KB minified build available for Web browsers.
 
 ## MIT LICENSE
 
-Copyright (c) 2020-2021 Yusuke Kawasaki
+Copyright (c) 2020-2023 Yusuke Kawasaki
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
