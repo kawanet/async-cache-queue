@@ -1,0 +1,19 @@
+{
+  "include": [
+    "./lib"
+  ],
+  "compilerOptions": {
+    "module": "es2020",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitReturns": false,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "removeComments": false,
+    "outDir": "./build/es5/",
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "target": "ES5"
+  }
+}
