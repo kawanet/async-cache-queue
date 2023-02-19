@@ -50,6 +50,8 @@ clean:
 
 test:
 	./node_modules/.bin/mocha test/*.js
+	node -e 'import("./dist/async-cache-queue.mjs").then(x => x.clearCache())'
+	node -e 'require("./dist/async-cache-queue.min.js").clearCache()'
 
 test-browser: build/test.js
 	open ./browser/test.html
