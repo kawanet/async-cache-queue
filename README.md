@@ -36,6 +36,12 @@ See TypeScript declaration
 [async-cache-queue.d.ts](https://github.com/kawanet/async-cache-queue/blob/main/types/async-cache-queue.d.ts)
 for more details.
 
+## ES MODULE
+
+```js
+import {queueFactory, clearCache} from "async-cache-queue";
+```
+
 ## FEATURES
 
 ### Positive Caching and Throttling
@@ -152,7 +158,6 @@ process.on("SIGHUP", clearCache);
 Less than 7KB minified build available for Web browsers.
 
 - https://cdn.jsdelivr.net/npm/async-cache-queue/dist/async-cache-queue.min.js
-
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/async-cache-queue/dist/async-cache-queue.min.js"></script>
