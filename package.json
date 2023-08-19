@@ -1,7 +1,7 @@
 {
   "name": "async-cache-queue",
   "description": "Lightweight asynchronous task queue with cache, timeout and throttle management",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "author": "Yusuke Kawasaki <u-suke@kawa.net>",
   "bugs": {
     "url": "https://github.com/kawanet/async-cache-queue/issues"
@@ -20,19 +20,22 @@
     "browserify": "^17.0.0",
     "browserify-sed": "^0.8.0",
     "key-value-compress": "^0.3.2",
-    "keyv": "^4.5.2",
+    "keyv": "^4.5.3",
     "keyv-memcache": "^1.2.5",
     "memcached-kvs": "^0.1.2",
-    "memjs": "^1.3.0",
+    "memjs": "^1.3.1",
     "mocha": "^10.2.0",
     "object-hash": "^3.0.0",
-    "rollup": "^3.17.1",
-    "terser": "^5.16.4",
+    "rollup": "^3.28.0",
+    "terser": "^5.19.2",
     "typescript": "^4.9.5"
   },
   "exports": {
     "require": "./lib/async-cache-queue.js",
-    "import": "./dist/async-cache-queue.mjs"
+    "import": {
+      "default": "./dist/async-cache-queue.mjs",
+      "types": "./types/async-cache-queue.d.ts"
+    }
   },
   "files": [
     "LICENSE",
