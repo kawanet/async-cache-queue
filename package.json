@@ -32,7 +32,10 @@
   },
   "exports": {
     "require": "./lib/async-cache-queue.js",
-    "import": "./dist/async-cache-queue.mjs"
+    "import": {
+      "default": "./dist/async-cache-queue.mjs",
+      "types": "./types/async-cache-queue.d.ts"
+    }
   },
   "files": [
     "LICENSE",
